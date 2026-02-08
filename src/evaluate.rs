@@ -5,9 +5,11 @@
 use crate::parser::AST;
 
 pub type Output = ();
+pub type Error = ();
 
-pub fn evaluate(ast: AST) -> Output {
+pub fn evaluate(ast: AST) -> Result<Output, Error> {
     println!("Evaluating");
+    Ok(())
 }
 
 #[cfg(test)]
