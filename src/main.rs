@@ -9,10 +9,20 @@ mod evaluate;
 // mod only declares the existence of submodules, not importing code
 // only need to specify mod in one place, usually in main
 
+type Error = ();
+
+fn run() -> Result<(), Error> {
+    let source = reader::read_source("somefile.lox")?;
+    let tokens = tokenizer::tokenize(&source)?;
+    let ast = parser::parse(tokens)?;
+    let out = evaluate::evaluate(ast)?;
+    Ok(())
+}
+
 fn main() {
     println!("Hello, Lox!");
-    let source = reader::read_source("somefile.lox").unwrap();
-    let tokens = tokenizer::tokenize(&source).unwrap();
-    let ast = parser::parse(tokens).unwrap();
-    let out = evaluate::evaluate(ast).unwrap();
+    match run() {
+        Ok(()) => { println!("Success!") },
+        Err(e) => { println!("Failure! {e:?}") },
+    }
 }
