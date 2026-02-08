@@ -6,11 +6,13 @@ mod tokenizer;
 mod parser;
 mod evaluate;
 
+// mod only declares the existence of submodules, not importing code
+// only need to specify mod in one place, usually in main
 
 fn main() {
     println!("Hello, Lox!");
-    reader::read_source();
-    tokenizer::tokenize();
-    parser::parse();
-    evaluate::evaluate();
+    let source = reader::read_source("somefile.lox");
+    let tokens = tokenizer::tokenize(&source);
+    let ast = parser::parse(tokens);
+    let out = evaluate::evaluate(ast);
 }
