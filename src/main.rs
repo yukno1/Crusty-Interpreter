@@ -1,4 +1,3 @@
-
 // initially break the project into 4 parts
 // Each in own file
 mod reader;
@@ -46,19 +45,37 @@ impl From<evaluator::Error> for Error {
     }
 }
 
-
-fn run() -> Result<(), Error> {
-    let source = reader::read_source("somefile.lox")?;
+fn run(source: reader::Source) -> Result<(), Error> {
     let tokens = tokenizer::tokenize(source)?;
     let ast = parser::parse(tokens)?;
     let out = evaluator::evaluate(ast)?;
     Ok(())
 }
 
+fn run_file(filename: &str) -> Result<(), Error> {
+    let source = reader::read_source(filename)?;
+    run(source)
+}
+
+fn run_prompt() {
+    // need to read from stdin
+    // create a source object and pass to run
+    todo!()
+}
+
 fn main() {
     println!("Hello, Lox!");
-    match run() {
-        Ok(()) => { println!("Success!") },
-        Err(e) => { println!("Failure! {e:?}") },
+
+    let args : Vec<String> = std::env::args().collect();
+    if args.len() == 1 {
+        run_prompt();
+    } else if args.len() == 2 {
+        match run_file(&args[1]) {
+            Ok(()) => { println!("Success!") },
+            Err(e) => { eprintln!("Failure! {e:?}") },
+        }
+    } else {
+        eprintln!("Usage: lox [filename]");
     }
+
 }
