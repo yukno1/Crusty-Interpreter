@@ -4,12 +4,14 @@
 
 use crate::parser::AST;
 
-pub type Output = ();
-pub type Error = ();
+pub struct Output {}
+
+#[derive(Debug)]
+pub struct Error {}
 
 pub fn evaluate(ast: AST) -> Result<Output, Error> {
     println!("Evaluating");
-    Ok(())
+    Ok(Output {  })
 }
 
 #[cfg(test)]
