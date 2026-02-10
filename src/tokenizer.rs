@@ -1,20 +1,73 @@
 // tokenizer.rs
 use crate::reader::Source;
 
-// express some high-level thinking about the problem of tokenizing.
-// 1. tokenizing will return all of the tokens in some way
-// 2. probabilty that tokenizing fails
-// two type aliases are "stubs" for these possibilities
+#[derive(Debug)]
+pub enum TokenType {
+    // single-character tokens
+    LeftParen,
+    RightParen,
+    LeftBrace,
+    RightBrace,
+    Comma,
+    Dot,
+    Minus,
+    Plus,
+    SemiColon,
+    Slash,
+    Star,
+    // one or two character tokens
+    Bang,
+    BangEqual,
+    Equal,
+    EqualEqual,
+    Greater,
+    GreaterEqual,
+    Less,
+    LessEqual,
+    // literals
+    Identifier,
+    String,
+    Number,
+    // keywords
+    And,
+    Class,
+    Else,
+    False,
+    Fun,
+    For,
+    If,
+    Nil,
+    Or,
+    Print,
+    Return,
+    Super,
+    This,
+    True,
+    Var,
+    While,
+    Eof,
+}
 
-pub struct Tokens {}
+#[derive(Debug)]
+pub struct Token {
+    pub toktype: TokenType,
+    pub lexeme: String,
+    // literal: Object,
+    pub line: usize,
+}
+
+#[derive(Debug)]
+pub struct Tokens {
+    pub tokens: Vec<Token>,
+}
 
 #[derive(Debug)]
 pub struct Error {}
 
-// standard way of handling errors to return Result<T, E>
 pub fn tokenize(_source: Source) -> Result<Tokens, Error> {
     println!("Tokenizing");
-    Ok(Tokens {})
+    let tokens = vec![];
+    Ok(Tokens { tokens })
 }
 
 #[cfg(test)]
