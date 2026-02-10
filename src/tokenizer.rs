@@ -12,9 +12,9 @@ pub struct Tokens {}
 pub struct Error {}
 
 // standard way of handling errors to return Result<T, E>
-pub fn tokenize(source: Source) -> Result<Tokens, Error> {
+pub fn tokenize(_source: Source) -> Result<Tokens, Error> {
     println!("Tokenizing");
-    Ok(Tokens {  })
+    Ok(Tokens {})
 }
 
 #[cfg(test)]

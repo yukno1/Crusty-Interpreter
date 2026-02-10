@@ -1,14 +1,16 @@
+use std::io::Write;
+
 // initially break the project into 4 parts
 // Each in own file
+mod evaluator;
+mod parser;
 mod reader;
 mod tokenizer;
-mod parser;
-mod evaluator;
 
 // mod only declares the existence of submodules, not importing code
 // only need to specify mod in one place, usually in main
 
-// top-level error type captures every possible bad things 
+// top-level error type captures every possible bad things
 // that can happen all in one place.
 // manage error flow
 #[derive(Debug)]
@@ -48,7 +50,7 @@ impl From<evaluator::Error> for Error {
 fn run(source: reader::Source) -> Result<(), Error> {
     let tokens = tokenizer::tokenize(source)?;
     let ast = parser::parse(tokens)?;
-    let out = evaluator::evaluate(ast)?;
+    let _out = evaluator::evaluate(ast)?;
     Ok(())
 }
 
@@ -60,22 +62,39 @@ fn run_file(filename: &str) -> Result<(), Error> {
 fn run_prompt() {
     // need to read from stdin
     // create a source object and pass to run
-    todo!()
+    let mut stdout = std::io::stdout();
+    let mut stdin = std::io::stdin();
+    loop {
+        stdout.write_all(b"> ").unwrap();
+        stdout.flush().unwrap();
+        let mut buffer: String = String::new();
+        stdin.read_line(&mut buffer).unwrap();
+        let source = reader::Source { contents: buffer };
+        match run(source) {
+            Ok(_) => {}
+            Err(e) => {
+                println!("{e:?}");
+            }
+        }
+    }
 }
 
 fn main() {
     println!("Hello, Lox!");
 
-    let args : Vec<String> = std::env::args().collect();
+    let args: Vec<String> = std::env::args().collect();
     if args.len() == 1 {
         run_prompt();
     } else if args.len() == 2 {
         match run_file(&args[1]) {
-            Ok(()) => { println!("Success!") },
-            Err(e) => { eprintln!("Failure! {e:?}") },
+            Ok(()) => {
+                println!("Success!")
+            }
+            Err(e) => {
+                eprintln!("Failure! {e:?}")
+            }
         }
     } else {
         eprintln!("Usage: lox [filename]");
     }
-
 }
