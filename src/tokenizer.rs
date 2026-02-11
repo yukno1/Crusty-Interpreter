@@ -1,7 +1,7 @@
 // tokenizer.rs
 use crate::reader::Source;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq)]
 pub enum TokenType {
     // single-character tokens
     LeftParen,
@@ -48,14 +48,14 @@ pub enum TokenType {
     Eof,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq)]
 pub enum Literal {
     Str(String),
     Num(f64),
     None,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq)]
 pub struct Token {
     pub toktype: TokenType,
     pub lexeme: String,
@@ -110,16 +110,16 @@ impl Scanner {
         self.current >= self.source.len()
     }
 
-    fn scan_tokens(&mut self) -> Result<Tokens, Error> {
+    fn scan_tokens(mut self) -> Result<Tokens, Error> {
         while !self.is_at_end() {
             self.start = self.current;
-            self.scan_tokens();
+            self.scan_token();
         }
         self.tokens
             .push(Token::new(TokenType::Eof, "", Literal::None, self.line));
 
         Ok(Tokens {
-            tokens: self.tokens.clone(),
+            tokens: self.tokens,
         })
     }
 
@@ -127,6 +127,17 @@ impl Scanner {
         let c = self.source[self.current];
         self.current += 1;
         c
+    }
+
+    fn matches(&mut self, expected: char) -> bool {
+        if self.is_at_end() {
+            return false;
+        }
+        if self.source[self.current] != expected {
+            return false;
+        }
+        self.current += 1;
+        true
     }
 
     fn add_token(&mut self, toktype: TokenType) {
@@ -152,6 +163,14 @@ impl Scanner {
             '*' => self.add_token(TokenType::Star),
             ';' => self.add_token(TokenType::SemiColon),
             '/' => self.add_token(TokenType::Slash),
+            '!' => {
+                let toktype = if self.matches('=') {
+                    TokenType::BangEqual
+                } else {
+                    TokenType::Bang
+                };
+                self.add_token(toktype);
+            }
             _ => todo!(),
         }
     }
@@ -170,5 +189,27 @@ mod tests {
     #[test]
     fn its_alive() {
         assert_eq!(true, true);
+    }
+
+    #[test]
+    fn single_character() {
+        let mut scanner = Scanner::new(r"(){},.+-;*");
+        let tokens = scanner.scan_tokens();
+        assert_eq!(
+            tokens.unwrap().tokens,
+            vec![
+                Token::new(TokenType::LeftParen, "(".to_string(), Literal::None, 1),
+                Token::new(TokenType::RightParen, ")".to_string(), Literal::None, 1),
+                Token::new(TokenType::LeftBrace, "{".to_string(), Literal::None, 1),
+                Token::new(TokenType::RightBrace, "}".to_string(), Literal::None, 1),
+                Token::new(TokenType::Comma, ",".to_string(), Literal::None, 1),
+                Token::new(TokenType::Dot, ".".to_string(), Literal::None, 1),
+                Token::new(TokenType::Plus, "+".to_string(), Literal::None, 1),
+                Token::new(TokenType::Minus, "-".to_string(), Literal::None, 1),
+                Token::new(TokenType::SemiColon, ";".to_string(), Literal::None, 1),
+                Token::new(TokenType::Star, "*".to_string(), Literal::None, 1),
+                Token::new(TokenType::Eof, "".to_string(), Literal::None, 1),
+            ]
+        )
     }
 }
