@@ -2,6 +2,7 @@
 use crate::reader::Source;
 
 #[derive(Debug, PartialEq)]
+#[allow(dead_code)]
 pub enum TokenType {
     // single-character tokens
     LeftParen,
@@ -110,6 +111,7 @@ impl Scanner {
         self.current >= self.source.len()
     }
 
+    // top-level method that called to do everything
     fn scan_tokens(mut self) -> Result<Tokens, Error> {
         while !self.is_at_end() {
             self.start = self.current;
@@ -171,6 +173,30 @@ impl Scanner {
                 };
                 self.add_token(toktype);
             }
+            '=' => {
+                let toktype = if self.matches('=') {
+                    TokenType::EqualEqual
+                } else {
+                    TokenType::Equal
+                };
+                self.add_token(toktype);
+            }
+            '<' => {
+                let toktype = if self.matches('=') {
+                    TokenType::LessEqual
+                } else {
+                    TokenType::Less
+                };
+                self.add_token(toktype);
+            }
+            '>' => {
+                let toktype = if self.matches('=') {
+                    TokenType::GreaterEqual
+                } else {
+                    TokenType::Greater
+                };
+                self.add_token(toktype);
+            }
             _ => todo!(),
         }
     }
@@ -193,21 +219,19 @@ mod tests {
 
     #[test]
     fn single_character() {
-        let mut scanner = Scanner::new(r"(){},.+-;*");
+        let scanner = Scanner::new(r"!!=<<=>>====");
         let tokens = scanner.scan_tokens();
         assert_eq!(
             tokens.unwrap().tokens,
             vec![
-                Token::new(TokenType::LeftParen, "(".to_string(), Literal::None, 1),
-                Token::new(TokenType::RightParen, ")".to_string(), Literal::None, 1),
-                Token::new(TokenType::LeftBrace, "{".to_string(), Literal::None, 1),
-                Token::new(TokenType::RightBrace, "}".to_string(), Literal::None, 1),
-                Token::new(TokenType::Comma, ",".to_string(), Literal::None, 1),
-                Token::new(TokenType::Dot, ".".to_string(), Literal::None, 1),
-                Token::new(TokenType::Plus, "+".to_string(), Literal::None, 1),
-                Token::new(TokenType::Minus, "-".to_string(), Literal::None, 1),
-                Token::new(TokenType::SemiColon, ";".to_string(), Literal::None, 1),
-                Token::new(TokenType::Star, "*".to_string(), Literal::None, 1),
+                Token::new(TokenType::Bang, "!".to_string(), Literal::None, 1),
+                Token::new(TokenType::BangEqual, "!=".to_string(), Literal::None, 1),
+                Token::new(TokenType::Less, "<".to_string(), Literal::None, 1),
+                Token::new(TokenType::LessEqual, "<=".to_string(), Literal::None, 1),
+                Token::new(TokenType::Greater, ">".to_string(), Literal::None, 1),
+                Token::new(TokenType::GreaterEqual, ">=".to_string(), Literal::None, 1),
+                Token::new(TokenType::EqualEqual, "==".to_string(), Literal::None, 1),
+                Token::new(TokenType::Equal, "=".to_string(), Literal::None, 1),
                 Token::new(TokenType::Eof, "".to_string(), Literal::None, 1),
             ]
         )
