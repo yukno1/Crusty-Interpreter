@@ -208,7 +208,7 @@ impl Scanner {
             '/' => {
                 if self.matches('/') {
                     // comment goes to end of line
-                    while self.peek() != '\n' && self.is_at_end() {
+                    while self.peek() != '\n' && !self.is_at_end() {
                         self.advance();
                     }
                 } else {
@@ -220,8 +220,28 @@ impl Scanner {
             '\n' => {
                 self.line += 1;
             }
-            _ => todo!(),
+            '"' => self.string(),
+            e => {
+                panic!("{e:?}");
+            }
         }
+    }
+
+    fn string(&mut self) {
+        while self.peek() != '"' && !self.is_at_end() {
+            if self.peek() == '\n' {
+                self.line += 1;
+            }
+            self.advance();
+        }
+        if self.is_at_end() {
+            todo!("Unterminated string")
+        }
+        self.advance();
+        let value: String = self.source[self.start + 1..self.current - 1]
+            .iter()
+            .collect();
+        self.add_token_with_literal(TokenType::String, Literal::Str(value));
     }
 }
 
@@ -277,6 +297,30 @@ mod tests {
                 Token::new(TokenType::GreaterEqual, ">=".to_string(), Literal::None, 1),
                 Token::new(TokenType::EqualEqual, "==".to_string(), Literal::None, 1),
                 Token::new(TokenType::Equal, "=".to_string(), Literal::None, 1),
+                Token::new(TokenType::Eof, "".to_string(), Literal::None, 1),
+            ]
+        )
+    }
+
+    #[test]
+    fn strings() {
+        let scanner = Scanner::new("\"Hello\" \"world!\"");
+        let tokens = scanner.scan_tokens();
+        assert_eq!(
+            tokens.unwrap().tokens,
+            vec![
+                Token::new(
+                    TokenType::String,
+                    "\"Hello\"",
+                    Literal::Str("Hello".to_string()),
+                    1
+                ),
+                Token::new(
+                    TokenType::String,
+                    "\"world!\"",
+                    Literal::Str("world!".to_string()),
+                    1
+                ),
                 Token::new(TokenType::Eof, "".to_string(), Literal::None, 1),
             ]
         )
