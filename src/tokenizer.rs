@@ -221,6 +221,9 @@ impl Scanner {
                 self.line += 1;
             }
             '"' => self.string(),
+            c if c.is_digit(10) => {
+                self.number();
+            }
             e => {
                 panic!("{e:?}");
             }
@@ -242,6 +245,21 @@ impl Scanner {
             .iter()
             .collect();
         self.add_token_with_literal(TokenType::String, Literal::Str(value));
+    }
+
+    fn number(&mut self) {
+        while self.peek().is_digit(10) {
+            self.advance();
+        }
+        if self.peek() == '.' {
+            self.advance();
+            while self.peek().is_digit(10) {
+                self.advance();
+            }
+        }
+        let lexeme: String = self.source[self.start..self.current].iter().collect();
+        let literal = Literal::Num(lexeme.parse().unwrap());
+        self.add_token_with_literal(TokenType::Number, literal);
     }
 }
 
@@ -321,6 +339,20 @@ mod tests {
                     Literal::Str("world!".to_string()),
                     1
                 ),
+                Token::new(TokenType::Eof, "".to_string(), Literal::None, 1),
+            ]
+        )
+    }
+
+    #[test]
+    fn numbers() {
+        let scanner = Scanner::new("12345 123.45");
+        let tokens = scanner.scan_tokens();
+        assert_eq!(
+            tokens.unwrap().tokens,
+            vec![
+                Token::new(TokenType::Number, "12345", Literal::Num(12345.0), 1),
+                Token::new(TokenType::Number, "123.45", Literal::Num(123.45), 1),
                 Token::new(TokenType::Eof, "".to_string(), Literal::None, 1),
             ]
         )
