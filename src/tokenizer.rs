@@ -142,6 +142,14 @@ impl Scanner {
         true
     }
 
+    fn peek(&mut self) -> char {
+        if self.is_at_end() {
+            '\x00'
+        } else {
+            self.source[self.current]
+        }
+    }
+
     fn add_token(&mut self, toktype: TokenType) {
         self.add_token_with_literal(toktype, Literal::None);
     }
@@ -197,6 +205,21 @@ impl Scanner {
                 };
                 self.add_token(toktype);
             }
+            '/' => {
+                if self.matches('/') {
+                    // comment goes to end of line
+                    while self.peek() != '\n' && self.is_at_end() {
+                        self.advance();
+                    }
+                } else {
+                    self.add_token(TokenType::Slash);
+                }
+            }
+            // ignore whitespace
+            ' ' | '\r' | '\t' => {}
+            '\n' => {
+                self.line += 1;
+            }
             _ => todo!(),
         }
     }
@@ -219,7 +242,29 @@ mod tests {
 
     #[test]
     fn single_character() {
-        let scanner = Scanner::new(r"!!=<<=>>====");
+        let mut scanner = Scanner::new(r"(){},.+-;*");
+        let tokens = scanner.scan_tokens();
+        assert_eq!(
+            tokens.unwrap().tokens,
+            vec![
+                Token::new(TokenType::LeftParen, "(".to_string(), Literal::None, 1),
+                Token::new(TokenType::RightParen, ")".to_string(), Literal::None, 1),
+                Token::new(TokenType::LeftBrace, "{".to_string(), Literal::None, 1),
+                Token::new(TokenType::RightBrace, "}".to_string(), Literal::None, 1),
+                Token::new(TokenType::Comma, ",".to_string(), Literal::None, 1),
+                Token::new(TokenType::Dot, ".".to_string(), Literal::None, 1),
+                Token::new(TokenType::Plus, "+".to_string(), Literal::None, 1),
+                Token::new(TokenType::Minus, "-".to_string(), Literal::None, 1),
+                Token::new(TokenType::SemiColon, ";".to_string(), Literal::None, 1),
+                Token::new(TokenType::Star, "*".to_string(), Literal::None, 1),
+                Token::new(TokenType::Eof, "".to_string(), Literal::None, 1),
+            ]
+        )
+    }
+
+    #[test]
+    fn two_character() {
+        let scanner = Scanner::new(r"! != < <= > >= == =");
         let tokens = scanner.scan_tokens();
         assert_eq!(
             tokens.unwrap().tokens,
