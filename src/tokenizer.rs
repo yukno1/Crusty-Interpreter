@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 // tokenizer.rs
 use crate::reader::Source;
 
@@ -224,6 +226,9 @@ impl Scanner {
             c if c.is_digit(10) => {
                 self.number();
             }
+            c if c.is_alphabetic() => {
+                self.identifier();
+            }
             e => {
                 panic!("{e:?}");
             }
@@ -260,6 +265,34 @@ impl Scanner {
         let lexeme: String = self.source[self.start..self.current].iter().collect();
         let literal = Literal::Num(lexeme.parse().unwrap());
         self.add_token_with_literal(TokenType::Number, literal);
+    }
+
+    fn identifier(&mut self) {
+        while self.peek().is_alphabetic() || self.peek() == '_' || self.peek().is_numeric() {
+            self.advance();
+        }
+        // look for keyword TODO
+        let lexeme: String = self.source[self.start..self.current].iter().collect();
+        let toktype = match &lexeme[..] {
+            "and" => TokenType::And,
+            "class" => TokenType::Class,
+            "else" => TokenType::Else,
+            "false" => TokenType::False,
+            "for" => TokenType::For,
+            "fun" => TokenType::Fun,
+            "if" => TokenType::If,
+            "nil" => TokenType::Nil,
+            "or" => TokenType::Or,
+            "print" => TokenType::Print,
+            "return" => TokenType::Return,
+            "super" => TokenType::Super,
+            "this" => TokenType::This,
+            "true" => TokenType::True,
+            "var" => TokenType::Var,
+            "while" => TokenType::While,
+            _ => TokenType::Identifier,
+        };
+        self.add_token(toktype);
     }
 }
 
@@ -353,6 +386,51 @@ mod tests {
             vec![
                 Token::new(TokenType::Number, "12345", Literal::Num(12345.0), 1),
                 Token::new(TokenType::Number, "123.45", Literal::Num(123.45), 1),
+                Token::new(TokenType::Eof, "".to_string(), Literal::None, 1),
+            ]
+        )
+    }
+
+    #[test]
+    fn identifiers() {
+        let scanner = Scanner::new("abc abc123 ab_cd");
+        let tokens = scanner.scan_tokens();
+        assert_eq!(
+            tokens.unwrap().tokens,
+            vec![
+                Token::new(TokenType::Identifier, "abc", Literal::None, 1),
+                Token::new(TokenType::Identifier, "abc123", Literal::None, 1),
+                Token::new(TokenType::Identifier, "ab_cd", Literal::None, 1),
+                Token::new(TokenType::Eof, "".to_string(), Literal::None, 1),
+            ]
+        )
+    }
+
+    #[test]
+    fn keywords() {
+        let scanner = Scanner::new(
+            "and class else false for fun if nil or print return super this true var while",
+        );
+        let tokens = scanner.scan_tokens();
+        assert_eq!(
+            tokens.unwrap().tokens,
+            vec![
+                Token::new(TokenType::And, "and", Literal::None, 1),
+                Token::new(TokenType::Class, "class", Literal::None, 1),
+                Token::new(TokenType::Else, "else", Literal::None, 1),
+                Token::new(TokenType::False, "false", Literal::None, 1),
+                Token::new(TokenType::For, "for", Literal::None, 1),
+                Token::new(TokenType::Fun, "fun", Literal::None, 1),
+                Token::new(TokenType::If, "if", Literal::None, 1),
+                Token::new(TokenType::Nil, "nil", Literal::None, 1),
+                Token::new(TokenType::Or, "or", Literal::None, 1),
+                Token::new(TokenType::Print, "print", Literal::None, 1),
+                Token::new(TokenType::Return, "return", Literal::None, 1),
+                Token::new(TokenType::Super, "super", Literal::None, 1),
+                Token::new(TokenType::This, "this", Literal::None, 1),
+                Token::new(TokenType::True, "true", Literal::None, 1),
+                Token::new(TokenType::Var, "var", Literal::None, 1),
+                Token::new(TokenType::While, "while", Literal::None, 1),
                 Token::new(TokenType::Eof, "".to_string(), Literal::None, 1),
             ]
         )
