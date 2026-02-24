@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 // tokenizer.rs
 use crate::reader::Source;
 
@@ -88,7 +86,12 @@ pub struct Tokens {
 }
 
 #[derive(Debug)]
-pub struct Error {}
+enum ScanError {
+    UnexpectedCharacter { line: usize, ch: char },
+}
+
+#[derive(Debug)]
+pub struct Error(Vec<ScanError>);
 
 struct Scanner {
     source: Vec<char>,
@@ -96,6 +99,7 @@ struct Scanner {
     start: usize,
     current: usize,
     line: usize,
+    errors: Vec<ScanError>,
 }
 
 impl Scanner {
@@ -106,7 +110,15 @@ impl Scanner {
             start: 0,
             current: 0,
             line: 1,
+            errors: Vec::new(),
         }
+    }
+
+    // collect errors in an internal vec
+    // when scanning, return the error list as result
+    // main program can decide what to do with errors
+    fn error(&mut self, err: ScanError) {
+        self.errors.push(err);
     }
 
     fn is_at_end(&self) -> bool {
@@ -122,9 +134,13 @@ impl Scanner {
         self.tokens
             .push(Token::new(TokenType::Eof, "", Literal::None, self.line));
 
-        Ok(Tokens {
-            tokens: self.tokens,
-        })
+        if self.errors.len() == 0 {
+            Ok(Tokens {
+                tokens: self.tokens,
+            })
+        } else {
+            Err(Error(self.errors))
+        }
     }
 
     fn advance(&mut self) -> char {
@@ -234,7 +250,10 @@ impl Scanner {
                 self.identifier();
             }
             e => {
-                panic!("{e:?}");
+                self.error(ScanError::UnexpectedCharacter {
+                    line: self.line,
+                    ch: e,
+                });
             }
         }
     }
