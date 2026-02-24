@@ -84,6 +84,9 @@ fn run_prompt() {
 fn main() {
     println!("Hello, Lox!");
 
+    // temporary shim to test ast
+    ast::main();
+
     let args: Vec<String> = std::env::args().collect();
     if args.len() == 1 {
         run_prompt();
