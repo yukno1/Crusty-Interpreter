@@ -297,10 +297,9 @@ impl Scanner {
     }
 }
 
-pub fn tokenize(_source: Source) -> Result<Tokens, Error> {
+pub fn tokenize(source: Source) -> Result<Tokens, Error> {
     println!("Tokenizing");
-    let tokens = vec![];
-    Ok(Tokens { tokens })
+    Scanner::new(&source.contents).scan_tokens()
 }
 
 #[cfg(test)]
