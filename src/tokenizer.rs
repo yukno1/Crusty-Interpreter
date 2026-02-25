@@ -332,17 +332,17 @@ mod tests {
         assert_eq!(
             tokens.unwrap().tokens,
             vec![
-                Token::new(TLeftParen, "(".to_string(), 1),
-                Token::new(TRightParen, ")".to_string(), 1),
-                Token::new(TLeftBrace, "{".to_string(), 1),
-                Token::new(TRightBrace, "}".to_string(), 1),
-                Token::new(TComma, ",".to_string(), 1),
-                Token::new(TDot, ".".to_string(), 1),
-                Token::new(TPlus, "+".to_string(), 1),
-                Token::new(TMinus, "-".to_string(), 1),
-                Token::new(TSemiColon, ";".to_string(), 1),
-                Token::new(TStar, "*".to_string(), 1),
-                Token::new(TEof, "".to_string(), 1),
+                Token::new(TLeftParen, "(", 1),
+                Token::new(TRightParen, ")", 1),
+                Token::new(TLeftBrace, "{", 1),
+                Token::new(TRightBrace, "}", 1),
+                Token::new(TComma, ",", 1),
+                Token::new(TDot, ".", 1),
+                Token::new(TPlus, "+", 1),
+                Token::new(TMinus, "-", 1),
+                Token::new(TSemiColon, ";", 1),
+                Token::new(TStar, "*", 1),
+                Token::new(TEof, "", 1),
             ]
         )
     }
@@ -354,15 +354,15 @@ mod tests {
         assert_eq!(
             tokens.unwrap().tokens,
             vec![
-                Token::new(TBang, "!".to_string(), 1),
-                Token::new(TBangEqual, "!=".to_string(), 1),
-                Token::new(TLess, "<".to_string(), 1),
-                Token::new(TLessEqual, "<=".to_string(), 1),
-                Token::new(TGreater, ">".to_string(), 1),
-                Token::new(TGreaterEqual, ">=".to_string(), 1),
-                Token::new(TEqualEqual, "==".to_string(), 1),
-                Token::new(TEqual, "=".to_string(), 1),
-                Token::new(TEof, "".to_string(), 1),
+                Token::new(TBang, "!", 1),
+                Token::new(TBangEqual, "!=", 1),
+                Token::new(TLess, "<", 1),
+                Token::new(TLessEqual, "<=", 1),
+                Token::new(TGreater, ">", 1),
+                Token::new(TGreaterEqual, ">=", 1),
+                Token::new(TEqualEqual, "==", 1),
+                Token::new(TEqual, "=", 1),
+                Token::new(TEof, "", 1),
             ]
         )
     }
@@ -376,7 +376,7 @@ mod tests {
             vec![
                 Token::new(TString, "\"Hello\"", 1),
                 Token::new(TString, "\"world!\"", 1),
-                Token::new(TEof, "".to_string(), 1),
+                Token::new(TEof, "", 1),
             ]
         )
     }
@@ -390,7 +390,7 @@ mod tests {
             vec![
                 Token::new(TNumber, "12345", 1),
                 Token::new(TNumber, "123.45", 1),
-                Token::new(TEof, "".to_string(), 1),
+                Token::new(TEof, "", 1),
             ]
         )
     }
@@ -405,7 +405,7 @@ mod tests {
                 Token::new(TIdentifier, "abc", 1),
                 Token::new(TIdentifier, "abc123", 1),
                 Token::new(TIdentifier, "ab_cd", 1),
-                Token::new(TEof, "".to_string(), 1),
+                Token::new(TEof, "", 1),
             ]
         )
     }
@@ -435,7 +435,7 @@ mod tests {
                 Token::new(TTrue, "true", 1),
                 Token::new(TVar, "var", 1),
                 Token::new(TWhile, "while", 1),
-                Token::new(TEof, "".to_string(), 1),
+                Token::new(TEof, "", 1),
             ]
         )
     }
