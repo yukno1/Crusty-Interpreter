@@ -98,11 +98,8 @@ pub fn format_expr(e: &Expr) -> String {
 pub fn main() {
     use crate::tokenizer::{Literal, Token, TokenType};
     let expression = Expr::binary(
-        Expr::unary(
-            Token::new(TokenType::Minus, "-", Literal::None, 1),
-            Expr::num(123.0),
-        ),
-        Token::new(TokenType::Star, "*", Literal::None, 1),
+        Expr::unary(Token::new(TokenType::TMinus, "-", 1), Expr::num(123.0)),
+        Token::new(TokenType::TStar, "*", 1),
         Expr::grouping(Expr::num(45.67)),
     );
     println!("{}", format_expr(&expression));

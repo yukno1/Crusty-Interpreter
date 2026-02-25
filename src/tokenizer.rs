@@ -5,48 +5,48 @@ use crate::reader::Source;
 #[allow(dead_code)]
 pub enum TokenType {
     // single-character tokens
-    LeftParen,
-    RightParen,
-    LeftBrace,
-    RightBrace,
-    Comma,
-    Dot,
-    Minus,
-    Plus,
-    SemiColon,
-    Slash,
-    Star,
+    TLeftParen,
+    TRightParen,
+    TLeftBrace,
+    TRightBrace,
+    TComma,
+    TDot,
+    TMinus,
+    TPlus,
+    TSemiColon,
+    TSlash,
+    TStar,
     // one or two character tokens
-    Bang,
-    BangEqual,
-    Equal,
-    EqualEqual,
-    Greater,
-    GreaterEqual,
-    Less,
-    LessEqual,
+    TBang,
+    TBangEqual,
+    TEqual,
+    TEqualEqual,
+    TGreater,
+    TGreaterEqual,
+    TLess,
+    TLessEqual,
     // literals
-    Identifier,
-    String,
-    Number,
+    TIdentifier,
+    TString,
+    TNumber,
     // keywords
-    And,
-    Class,
-    Else,
-    False,
-    Fun,
-    For,
-    If,
-    Nil,
-    Or,
-    Print,
-    Return,
-    Super,
-    This,
-    True,
-    Var,
-    While,
-    Eof,
+    TAnd,
+    TClass,
+    TElse,
+    TFalse,
+    TFun,
+    TFor,
+    TIf,
+    TNil,
+    TOr,
+    TPrint,
+    TReturn,
+    TSuper,
+    TThis,
+    TTrue,
+    TVar,
+    TWhile,
+    TEof,
 }
 
 #[derive(Debug, PartialEq)]
@@ -56,11 +56,13 @@ pub enum Literal {
     None,
 }
 
+use TokenType::*;
+
 #[derive(Debug, PartialEq)]
 pub struct Token {
     pub toktype: TokenType,
     pub lexeme: String,
-    pub literal: Literal,
+    // pub literal: Literal,
     pub line: usize,
 }
 
@@ -68,13 +70,13 @@ impl Token {
     pub fn new(
         toktype: TokenType,
         lexeme: impl Into<String>,
-        literal: Literal,
+        // literal: Literal,
         line: usize,
     ) -> Token {
         Token {
             toktype,
             lexeme: lexeme.into(),
-            literal,
+            // literal,
             line,
         }
     }
@@ -88,6 +90,7 @@ pub struct Tokens {
 #[derive(Debug)]
 enum ScanError {
     UnexpectedCharacter { line: usize, ch: char },
+    UnterminatedString { line: usize },
 }
 
 #[derive(Debug)]
@@ -131,8 +134,7 @@ impl Scanner {
             self.start = self.current;
             self.scan_token();
         }
-        self.tokens
-            .push(Token::new(TokenType::Eof, "", Literal::None, self.line));
+        self.tokens.push(Token::new(TEof, "", self.line));
 
         if self.errors.len() == 0 {
             Ok(Tokens {
@@ -170,60 +172,51 @@ impl Scanner {
 
     fn lexeme(&self) -> String {
         // return the current lexeme as a string
+        // b/c store source as Vec<char> (not utf-8)
         self.source[self.start..self.current].iter().collect()
     }
 
     fn add_token(&mut self, toktype: TokenType) {
-        self.add_token_with_literal(toktype, Literal::None);
+        self.tokens
+            .push(Token::new(toktype, self.lexeme(), self.line));
     }
 
-    fn add_token_with_literal(&mut self, toktype: TokenType, literal: Literal) {
-        self.tokens
-            .push(Token::new(toktype, self.lexeme(), literal, self.line));
-    }
+    fn add_token_with_literal(&mut self, toktype: TokenType, literal: Literal) {}
 
     fn scan_token(&mut self) {
         match self.advance() {
-            '(' => self.add_token(TokenType::LeftParen),
-            ')' => self.add_token(TokenType::RightParen),
-            '{' => self.add_token(TokenType::LeftBrace),
-            '}' => self.add_token(TokenType::RightBrace),
-            ',' => self.add_token(TokenType::Comma),
-            '.' => self.add_token(TokenType::Dot),
-            '+' => self.add_token(TokenType::Plus),
-            '-' => self.add_token(TokenType::Minus),
-            '*' => self.add_token(TokenType::Star),
-            ';' => self.add_token(TokenType::SemiColon),
-            '/' => self.add_token(TokenType::Slash),
+            '(' => self.add_token(TLeftParen),
+            ')' => self.add_token(TRightParen),
+            '{' => self.add_token(TLeftBrace),
+            '}' => self.add_token(TRightBrace),
+            ',' => self.add_token(TComma),
+            '.' => self.add_token(TDot),
+            '+' => self.add_token(TPlus),
+            '-' => self.add_token(TMinus),
+            '*' => self.add_token(TStar),
+            ';' => self.add_token(TSemiColon),
+            '/' => self.add_token(TSlash),
             '!' => {
-                let toktype = if self.matches('=') {
-                    TokenType::BangEqual
-                } else {
-                    TokenType::Bang
-                };
+                let toktype = if self.matches('=') { TBangEqual } else { TBang };
                 self.add_token(toktype);
             }
             '=' => {
                 let toktype = if self.matches('=') {
-                    TokenType::EqualEqual
+                    TEqualEqual
                 } else {
-                    TokenType::Equal
+                    TEqual
                 };
                 self.add_token(toktype);
             }
             '<' => {
-                let toktype = if self.matches('=') {
-                    TokenType::LessEqual
-                } else {
-                    TokenType::Less
-                };
+                let toktype = if self.matches('=') { TLessEqual } else { TLess };
                 self.add_token(toktype);
             }
             '>' => {
                 let toktype = if self.matches('=') {
-                    TokenType::GreaterEqual
+                    TGreaterEqual
                 } else {
-                    TokenType::Greater
+                    TGreater
                 };
                 self.add_token(toktype);
             }
@@ -234,7 +227,7 @@ impl Scanner {
                         self.advance();
                     }
                 } else {
-                    self.add_token(TokenType::Slash);
+                    self.add_token(TSlash);
                 }
             }
             // ignore whitespace
@@ -266,13 +259,15 @@ impl Scanner {
             self.advance();
         }
         if self.is_at_end() {
-            todo!("Unterminated string")
+            self.error(ScanError::UnterminatedString { line: self.line });
+            return;
         }
         self.advance();
-        let value: String = self.source[self.start + 1..self.current - 1]
-            .iter()
-            .collect();
-        self.add_token_with_literal(TokenType::String, Literal::Str(value));
+        // let value: String = self.source[self.start + 1..self.current - 1]
+        //     .iter()
+        //     .collect();
+        // self.add_token_with_literal(TString, Literal::Str(value));
+        self.add_token(TString);
     }
 
     fn number(&mut self) {
@@ -285,8 +280,8 @@ impl Scanner {
                 self.advance();
             }
         }
-        let literal = Literal::Num(self.lexeme().parse().unwrap());
-        self.add_token_with_literal(TokenType::Number, literal);
+        // let literal = Literal::Num(self.lexeme().parse().unwrap());
+        self.add_token(TNumber);
     }
 
     fn identifier(&mut self) {
@@ -294,23 +289,23 @@ impl Scanner {
             self.advance();
         }
         let toktype = match &self.lexeme()[..] {
-            "and" => TokenType::And,
-            "class" => TokenType::Class,
-            "else" => TokenType::Else,
-            "false" => TokenType::False,
-            "for" => TokenType::For,
-            "fun" => TokenType::Fun,
-            "if" => TokenType::If,
-            "nil" => TokenType::Nil,
-            "or" => TokenType::Or,
-            "print" => TokenType::Print,
-            "return" => TokenType::Return,
-            "super" => TokenType::Super,
-            "this" => TokenType::This,
-            "true" => TokenType::True,
-            "var" => TokenType::Var,
-            "while" => TokenType::While,
-            _ => TokenType::Identifier,
+            "and" => TAnd,
+            "class" => TClass,
+            "else" => TElse,
+            "false" => TFalse,
+            "for" => TFor,
+            "fun" => TFun,
+            "if" => TIf,
+            "nil" => TNil,
+            "or" => TOr,
+            "print" => TPrint,
+            "return" => TReturn,
+            "super" => TSuper,
+            "this" => TThis,
+            "true" => TTrue,
+            "var" => TVar,
+            "while" => TWhile,
+            _ => TIdentifier,
         };
         self.add_token(toktype);
     }
@@ -337,17 +332,17 @@ mod tests {
         assert_eq!(
             tokens.unwrap().tokens,
             vec![
-                Token::new(TokenType::LeftParen, "(".to_string(), Literal::None, 1),
-                Token::new(TokenType::RightParen, ")".to_string(), Literal::None, 1),
-                Token::new(TokenType::LeftBrace, "{".to_string(), Literal::None, 1),
-                Token::new(TokenType::RightBrace, "}".to_string(), Literal::None, 1),
-                Token::new(TokenType::Comma, ",".to_string(), Literal::None, 1),
-                Token::new(TokenType::Dot, ".".to_string(), Literal::None, 1),
-                Token::new(TokenType::Plus, "+".to_string(), Literal::None, 1),
-                Token::new(TokenType::Minus, "-".to_string(), Literal::None, 1),
-                Token::new(TokenType::SemiColon, ";".to_string(), Literal::None, 1),
-                Token::new(TokenType::Star, "*".to_string(), Literal::None, 1),
-                Token::new(TokenType::Eof, "".to_string(), Literal::None, 1),
+                Token::new(TLeftParen, "(".to_string(), 1),
+                Token::new(TRightParen, ")".to_string(), 1),
+                Token::new(TLeftBrace, "{".to_string(), 1),
+                Token::new(TRightBrace, "}".to_string(), 1),
+                Token::new(TComma, ",".to_string(), 1),
+                Token::new(TDot, ".".to_string(), 1),
+                Token::new(TPlus, "+".to_string(), 1),
+                Token::new(TMinus, "-".to_string(), 1),
+                Token::new(TSemiColon, ";".to_string(), 1),
+                Token::new(TStar, "*".to_string(), 1),
+                Token::new(TEof, "".to_string(), 1),
             ]
         )
     }
@@ -359,15 +354,15 @@ mod tests {
         assert_eq!(
             tokens.unwrap().tokens,
             vec![
-                Token::new(TokenType::Bang, "!".to_string(), Literal::None, 1),
-                Token::new(TokenType::BangEqual, "!=".to_string(), Literal::None, 1),
-                Token::new(TokenType::Less, "<".to_string(), Literal::None, 1),
-                Token::new(TokenType::LessEqual, "<=".to_string(), Literal::None, 1),
-                Token::new(TokenType::Greater, ">".to_string(), Literal::None, 1),
-                Token::new(TokenType::GreaterEqual, ">=".to_string(), Literal::None, 1),
-                Token::new(TokenType::EqualEqual, "==".to_string(), Literal::None, 1),
-                Token::new(TokenType::Equal, "=".to_string(), Literal::None, 1),
-                Token::new(TokenType::Eof, "".to_string(), Literal::None, 1),
+                Token::new(TBang, "!".to_string(), 1),
+                Token::new(TBangEqual, "!=".to_string(), 1),
+                Token::new(TLess, "<".to_string(), 1),
+                Token::new(TLessEqual, "<=".to_string(), 1),
+                Token::new(TGreater, ">".to_string(), 1),
+                Token::new(TGreaterEqual, ">=".to_string(), 1),
+                Token::new(TEqualEqual, "==".to_string(), 1),
+                Token::new(TEqual, "=".to_string(), 1),
+                Token::new(TEof, "".to_string(), 1),
             ]
         )
     }
@@ -379,19 +374,9 @@ mod tests {
         assert_eq!(
             tokens.unwrap().tokens,
             vec![
-                Token::new(
-                    TokenType::String,
-                    "\"Hello\"",
-                    Literal::Str("Hello".to_string()),
-                    1
-                ),
-                Token::new(
-                    TokenType::String,
-                    "\"world!\"",
-                    Literal::Str("world!".to_string()),
-                    1
-                ),
-                Token::new(TokenType::Eof, "".to_string(), Literal::None, 1),
+                Token::new(TString, "\"Hello\"", 1),
+                Token::new(TString, "\"world!\"", 1),
+                Token::new(TEof, "".to_string(), 1),
             ]
         )
     }
@@ -403,9 +388,9 @@ mod tests {
         assert_eq!(
             tokens.unwrap().tokens,
             vec![
-                Token::new(TokenType::Number, "12345", Literal::Num(12345.0), 1),
-                Token::new(TokenType::Number, "123.45", Literal::Num(123.45), 1),
-                Token::new(TokenType::Eof, "".to_string(), Literal::None, 1),
+                Token::new(TNumber, "12345", 1),
+                Token::new(TNumber, "123.45", 1),
+                Token::new(TEof, "".to_string(), 1),
             ]
         )
     }
@@ -417,10 +402,10 @@ mod tests {
         assert_eq!(
             tokens.unwrap().tokens,
             vec![
-                Token::new(TokenType::Identifier, "abc", Literal::None, 1),
-                Token::new(TokenType::Identifier, "abc123", Literal::None, 1),
-                Token::new(TokenType::Identifier, "ab_cd", Literal::None, 1),
-                Token::new(TokenType::Eof, "".to_string(), Literal::None, 1),
+                Token::new(TIdentifier, "abc", 1),
+                Token::new(TIdentifier, "abc123", 1),
+                Token::new(TIdentifier, "ab_cd", 1),
+                Token::new(TEof, "".to_string(), 1),
             ]
         )
     }
@@ -434,23 +419,23 @@ mod tests {
         assert_eq!(
             tokens.unwrap().tokens,
             vec![
-                Token::new(TokenType::And, "and", Literal::None, 1),
-                Token::new(TokenType::Class, "class", Literal::None, 1),
-                Token::new(TokenType::Else, "else", Literal::None, 1),
-                Token::new(TokenType::False, "false", Literal::None, 1),
-                Token::new(TokenType::For, "for", Literal::None, 1),
-                Token::new(TokenType::Fun, "fun", Literal::None, 1),
-                Token::new(TokenType::If, "if", Literal::None, 1),
-                Token::new(TokenType::Nil, "nil", Literal::None, 1),
-                Token::new(TokenType::Or, "or", Literal::None, 1),
-                Token::new(TokenType::Print, "print", Literal::None, 1),
-                Token::new(TokenType::Return, "return", Literal::None, 1),
-                Token::new(TokenType::Super, "super", Literal::None, 1),
-                Token::new(TokenType::This, "this", Literal::None, 1),
-                Token::new(TokenType::True, "true", Literal::None, 1),
-                Token::new(TokenType::Var, "var", Literal::None, 1),
-                Token::new(TokenType::While, "while", Literal::None, 1),
-                Token::new(TokenType::Eof, "".to_string(), Literal::None, 1),
+                Token::new(TAnd, "and", 1),
+                Token::new(TClass, "class", 1),
+                Token::new(TElse, "else", 1),
+                Token::new(TFalse, "false", 1),
+                Token::new(TFor, "for", 1),
+                Token::new(TFun, "fun", 1),
+                Token::new(TIf, "if", 1),
+                Token::new(TNil, "nil", 1),
+                Token::new(TOr, "or", 1),
+                Token::new(TPrint, "print", 1),
+                Token::new(TReturn, "return", 1),
+                Token::new(TSuper, "super", 1),
+                Token::new(TThis, "this", 1),
+                Token::new(TTrue, "true", 1),
+                Token::new(TVar, "var", 1),
+                Token::new(TWhile, "while", 1),
+                Token::new(TEof, "".to_string(), 1),
             ]
         )
     }
