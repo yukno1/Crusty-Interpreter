@@ -2,7 +2,7 @@
 //
 // Run a Lox program
 
-use crate::parser::AST;
+use crate::ast::AST;
 
 pub struct Output {}
 
