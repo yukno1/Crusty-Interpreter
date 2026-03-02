@@ -181,8 +181,6 @@ impl Scanner {
             .push(Token::new(toktype, self.lexeme(), self.line));
     }
 
-    fn add_token_with_literal(&mut self, toktype: TokenType, literal: Literal) {}
-
     fn scan_token(&mut self) {
         match self.advance() {
             '(' => self.add_token(TLeftParen),
@@ -327,7 +325,7 @@ mod tests {
 
     #[test]
     fn single_character() {
-        let mut scanner = Scanner::new(r"(){},.+-;*");
+        let scanner = Scanner::new(r"(){},.+-;*");
         let tokens = scanner.scan_tokens();
         assert_eq!(
             tokens.unwrap().tokens,

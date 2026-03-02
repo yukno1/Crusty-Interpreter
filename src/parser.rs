@@ -1,7 +1,31 @@
 // parser.rs
 
-use crate::ast::{AST, Expr};
+use std::usize;
+
+use crate::ast::{AST, Expr, Operator};
 use crate::tokenizer::{Token, TokenType, Tokens};
+use TokenType::*;
+
+impl From<&Token> for Operator {
+    fn from(tok: &Token) -> Operator {
+        match tok.toktype {
+            TPlus => Operator::OAdd,
+            TMinus => Operator::OSub,
+            TStar => Operator::OMul,
+            TSlash => Operator::ODiv,
+            TLess => Operator::OLt,
+            TLessEqual => Operator::OLe,
+            TGreater => Operator::OGt,
+            TGreaterEqual => Operator::OGe,
+            TEqualEqual => Operator::OEq,
+            TBangEqual => Operator::ONe,
+            TAnd => Operator::OAdd,
+            TOr => Operator::OOr,
+            TBang => Operator::ONot,
+            _ => panic!("Not an operator {:?}", tok.toktype),
+        }
+    }
+}
 
 #[derive(Debug)]
 pub struct Error {}
@@ -21,13 +45,49 @@ impl Parser {
         }
     }
 
+    // accept any token from a list of possible types
+    fn accepts<const N: usize>(&mut self, toktypes: [TokenType; N]) -> bool {
+        if !self.at_end() && toktypes.contains(&self.tokens[self.n].toktype) {
+            self.n += 1;
+            true
+        } else {
+            false
+        }
+    }
+
     // return last matched token (a borrow)
-    fn last(&mut self) -> &Token {
+    fn last_token(&mut self) -> &Token {
         &self.tokens[self.n - 1]
+    }
+
+    fn last_lexeme(&self) -> &String {
+        &self.tokens[self.n - 1].lexeme
     }
 
     fn at_end(&self) -> bool {
         self.n >= self.tokens.len()
+    }
+
+    fn parse_expression(&mut self) -> Expr {
+        let left = self.parse_term();
+        if self.accepts([TPlus, TMinus, TStar, TSlash]) {
+            let operator = Operator::from(self.last_token());
+            let right = self.parse_term();
+            Expr::binary(left, operator, right)
+        } else {
+            left
+        }
+    }
+
+    // parse a single value
+    fn parse_term(&mut self) -> Expr {
+        if self.accept(TokenType::TNumber) {
+            Expr::num(self.last_lexeme())
+        } else if self.accept(TokenType::TString) {
+            Expr::str(self.last_lexeme())
+        } else {
+            panic!("Syntax Error!")
+        }
     }
 }
 

@@ -52,24 +52,24 @@ pub enum Expr {
 }
 
 impl Expr {
-    fn num(value: impl Into<String>) -> Expr {
+    pub fn num(value: impl Into<String>) -> Expr {
         Expr::ENum {
             value: value.into(),
         }
     }
-    fn str(value: impl Into<String>) -> Expr {
+    pub fn str(value: impl Into<String>) -> Expr {
         Expr::EStr {
             value: value.into(),
         }
     }
-    fn bool(value: bool) -> Expr {
+    pub fn bool(value: bool) -> Expr {
         Expr::EBool { value }
     }
-    fn nil() -> Expr {
+    pub fn nil() -> Expr {
         Expr::ENil
     }
 
-    fn binary(left: Expr, operator: Operator, right: Expr) -> Expr {
+    pub fn binary(left: Expr, operator: Operator, right: Expr) -> Expr {
         Expr::EBinary {
             left: left.into(),
             operator,
@@ -78,7 +78,7 @@ impl Expr {
         // into() put value into a Box
     }
 
-    fn unary(operator: Operator, right: Expr) -> Expr {
+    pub fn unary(operator: Operator, right: Expr) -> Expr {
         Expr::EUnary {
             operator,
             right: right.into(),
@@ -86,7 +86,7 @@ impl Expr {
         // into() put value into a Box
     }
 
-    fn grouping(expr: Expr) -> Expr {
+    pub fn grouping(expr: Expr) -> Expr {
         Expr::EGrouping {
             expression: expr.into(),
         }
