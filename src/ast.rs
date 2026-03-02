@@ -1,7 +1,7 @@
 // ast should be a stand-alone ds that has no dependence on ds defined in tokenizer
 
 // top-level representation of ast for entire program
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct AST {
     pub top: Option<Expr>,
 }
@@ -23,7 +23,7 @@ pub enum Operator {
     OOr,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Expr {
     // store number as strings representing the way
     // in which tthe number is actually written in source code

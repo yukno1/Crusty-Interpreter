@@ -9,6 +9,12 @@ pub struct Source {
     pub contents: String,
 }
 
+impl Source {
+    pub fn from(s: impl Into<String>) -> Source {
+        Source { contents: s.into() }
+    }
+}
+
 #[derive(Debug)]
 pub struct Error {
     msg: String,

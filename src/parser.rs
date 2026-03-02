@@ -36,6 +36,13 @@ struct Parser {
 }
 
 impl Parser {
+    fn new(tokens: Tokens) -> Parser {
+        Parser {
+            tokens: tokens.tokens,
+            n: 0,
+        }
+    }
+
     fn accept(&mut self, toktype: TokenType) -> bool {
         if !self.at_end() && self.tokens[self.n].toktype == toktype {
             self.n += 1;
@@ -68,6 +75,12 @@ impl Parser {
         self.n >= self.tokens.len()
     }
 
+    fn parse_top(&mut self) -> Result<AST, Error> {
+        Ok(AST {
+            top: Some(self.parse_expression()),
+        })
+    }
+
     fn parse_expression(&mut self) -> Expr {
         let left = self.parse_term();
         if self.accepts([TPlus, TMinus, TStar, TSlash]) {
@@ -91,17 +104,37 @@ impl Parser {
     }
 }
 
-pub fn parse(_tokens: Tokens) -> Result<AST, Error> {
+pub fn parse(tokens: Tokens) -> Result<AST, Error> {
     println!("Parsing");
-    Ok(AST { top: None })
+    Parser::new(tokens).parse_top()
+    // Ok(AST { top: None })
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    // helper
+    fn parse_string(s: &str) -> AST {
+        use crate::reader::Source;
+        use crate::tokenizer::tokenize;
+        let source = Source::from(s);
+        let tokens = tokenize(source).unwrap();
+        parse(tokens).unwrap()
+    }
+
     #[test]
     fn its_alive() {
         assert_eq!(true, true);
+    }
+
+    #[test]
+    fn test_term() {
+        assert_eq!(
+            parse_string("123"),
+            AST {
+                top: Some(Expr::num("123"))
+            }
+        );
     }
 }
