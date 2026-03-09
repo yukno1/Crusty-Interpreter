@@ -82,10 +82,10 @@ impl Parser {
     }
 
     fn parse_expression(&mut self) -> Expr {
-        let left = self.parse_term();
+        let left = self.parse_primary();
         if self.accepts([TPlus, TMinus, TStar, TSlash]) {
             let operator = Operator::from(self.last_token());
-            let right = self.parse_term();
+            let right = self.parse_primary();
             Expr::binary(left, operator, right)
         } else {
             left
@@ -93,7 +93,7 @@ impl Parser {
     }
 
     // parse a single value
-    fn parse_term(&mut self) -> Expr {
+    fn parse_primary(&mut self) -> Expr {
         if self.accept(TokenType::TNumber) {
             Expr::num(self.last_lexeme())
         } else if self.accept(TokenType::TString) {
@@ -129,7 +129,7 @@ mod tests {
     }
 
     #[test]
-    fn test_term() {
+    fn test_primary() {
         assert_eq!(
             parse_string("123"),
             AST {
