@@ -6,6 +6,7 @@ use crate::ast::{AST, Expr, Operator};
 use crate::tokenizer::{Token, TokenType, Tokens};
 use TokenType::*;
 
+// map from token to operator
 impl From<&Token> for Operator {
     fn from(tok: &Token) -> Operator {
         match tok.toktype {
@@ -62,6 +63,13 @@ impl Parser {
         }
     }
 
+    fn expect(&mut self, toktype: TokenType, msg: &str){
+        // require next token to exactly match given token or else error
+        if !self.accept(toktype){
+            panic!("Syntax error: {msg}");
+        }
+    }
+
     // return last matched token (a borrow)
     fn last_token(&mut self) -> &Token {
         &self.tokens[self.n - 1]
@@ -98,7 +106,12 @@ impl Parser {
             Expr::num(self.last_lexeme())
         } else if self.accept(TokenType::TString) {
             Expr::str(self.last_lexeme())
-        } else {
+        } else if self.accept(TokenType::TLeftParen) {
+            let expr = self.parse_expression();
+            self.expect(TRightParen, "Expected ')' after expression");
+            Expr::grouping(expr)
+        }
+        else {
             panic!("Syntax Error!")
         }
     }
@@ -134,6 +147,12 @@ mod tests {
             parse_string("123"),
             AST {
                 top: Some(Expr::num("123"))
+            }
+        );
+        assert_eq!(
+            parse_string("\"hello\""),
+            AST {
+                top: Some(Expr::str("\"hello\""))
             }
         );
     }
