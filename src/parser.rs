@@ -30,7 +30,7 @@ impl From<&Token> for Operator {
 
 #[derive(Debug)]
 pub enum Error {
-    SyntaxError {line: usize, msg: String},
+    SyntaxError { line: usize, msg: String },
 }
 
 struct Parser {
@@ -65,20 +65,20 @@ impl Parser {
         }
     }
 
-    fn expect(&mut self, toktype: TokenType, msg: &str) -> Result<(), Error>{
+    fn expect(&mut self, toktype: TokenType, msg: &str) -> Result<(), Error> {
         // require next token to exactly match given token or else error
-        if !self.accept(toktype){
+        if !self.accept(toktype) {
             Err(self.syntax_error(msg))
-        } else{
+        } else {
             Ok(())
         }
     }
 
     // helper function
-    fn syntax_error(&self, msg: &str) -> Error{
-        Error::SyntaxError{
+    fn syntax_error(&self, msg: &str) -> Error {
+        Error::SyntaxError {
             line: self.tokens[self.n].line,
-            msg: msg.into()
+            msg: format!("{msg} at {:?}", self.tokens[self.n].lexeme),
         }
     }
 
@@ -96,9 +96,11 @@ impl Parser {
     }
 
     fn parse_top(&mut self) -> Result<AST, Error> {
-        Ok(AST {
-            top: Some(self.parse_expression()?),
-        })
+        let top = self.parse_expression()?;
+        if !self.at_end() {
+            return Err(self.syntax_error("Unparsed input"));
+        }
+        Ok(AST { top })
     }
 
     fn parse_expression(&mut self) -> Result<Expr, Error> {
@@ -114,20 +116,17 @@ impl Parser {
 
     // parse a single value
     fn parse_primary(&mut self) -> Result<Expr, Error> {
-        Ok(
-            if self.accept(TokenType::TNumber) {
-                Expr::num(self.last_lexeme())
-            } else if self.accept(TokenType::TString) {
-                Expr::str(self.last_lexeme())
-            } else if self.accept(TokenType::TLeftParen) {
-                let expr = self.parse_expression()?;
-                self.expect(TRightParen, "Expected ')' after expression")?;
-                Expr::grouping(expr)
-            }
-            else {
-                return Err(self.syntax_error("Expected primary"));
-            }
-        )
+        Ok(if self.accept(TokenType::TNumber) {
+            Expr::num(self.last_lexeme())
+        } else if self.accept(TokenType::TString) {
+            Expr::str(self.last_lexeme())
+        } else if self.accept(TokenType::TLeftParen) {
+            let expr = self.parse_expression()?;
+            self.expect(TRightParen, "Expected ')' after expression")?;
+            Expr::grouping(expr)
+        } else {
+            return Err(self.syntax_error("Expected primary"));
+        })
     }
 }
 
@@ -160,19 +159,19 @@ mod tests {
         assert_eq!(
             parse_string("123"),
             AST {
-                top: Some(Expr::num("123"))
+                top: Expr::num("123")
             }
         );
         assert_eq!(
             parse_string("\"hello\""),
             AST {
-                top: Some(Expr::str("\"hello\""))
+                top: Expr::str("\"hello\"")
             }
         );
         assert_eq!(
             parse_string("(2)"),
             AST {
-                top: Some(Expr::grouping(Expr::num("2")))
+                top: Expr::grouping(Expr::num("2"))
             }
         );
     }
@@ -182,7 +181,7 @@ mod tests {
         assert_eq!(
             parse_string("1+2"),
             AST {
-                top: Some(Expr::binary(Expr::num("1"), Operator::OAdd, Expr::num("2")))
+                top: Expr::binary(Expr::num("1"), Operator::OAdd, Expr::num("2"))
             }
         );
     }

@@ -3,7 +3,7 @@
 // top-level representation of ast for entire program
 #[derive(Debug, PartialEq)]
 pub struct AST {
-    pub top: Option<Expr>,
+    pub top: Expr,
 }
 
 #[derive(Debug, PartialEq)]
