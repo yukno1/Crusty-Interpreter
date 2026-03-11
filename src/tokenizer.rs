@@ -129,6 +129,7 @@ impl Scanner {
     }
 
     // top-level method that called to do everything
+    // take ownership of self
     fn scan_tokens(mut self) -> Result<Tokens, Error> {
         while !self.is_at_end() {
             self.start = self.current;
@@ -138,7 +139,7 @@ impl Scanner {
 
         if self.errors.len() == 0 {
             Ok(Tokens {
-                tokens: self.tokens,
+                tokens: self.tokens, // only tokens move out, other disappear
             })
         } else {
             Err(Error(self.errors))

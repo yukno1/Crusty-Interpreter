@@ -6,6 +6,12 @@ use crate::ast::AST;
 
 pub struct Output {}
 
+enum LoxValue {
+    LNil,
+    LBoolean(bool),
+    LNumber(f64),
+}
+
 #[derive(Debug)]
 pub struct Error {}
 
