@@ -92,7 +92,7 @@ impl Parser {
     }
 
     fn at_end(&self) -> bool {
-        self.n >= self.tokens.len()
+        self.n >= self.tokens.len() || self.tokens[self.n].toktype == TEof
     }
 
     fn parse_top(&mut self) -> Result<AST, Error> {

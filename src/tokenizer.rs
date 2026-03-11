@@ -135,7 +135,7 @@ impl Scanner {
             self.start = self.current;
             self.scan_token();
         }
-        self.tokens.push(Token::new(TEof, "", self.line));
+        self.tokens.push(Token::new(TEof, "Eof", self.line));
 
         if self.errors.len() == 0 {
             Ok(Tokens {
@@ -341,7 +341,7 @@ mod tests {
                 Token::new(TMinus, "-", 1),
                 Token::new(TSemiColon, ";", 1),
                 Token::new(TStar, "*", 1),
-                Token::new(TEof, "", 1),
+                Token::new(TEof, "Eof", 1),
             ]
         )
     }
@@ -361,7 +361,7 @@ mod tests {
                 Token::new(TGreaterEqual, ">=", 1),
                 Token::new(TEqualEqual, "==", 1),
                 Token::new(TEqual, "=", 1),
-                Token::new(TEof, "", 1),
+                Token::new(TEof, "Eof", 1),
             ]
         )
     }
@@ -375,7 +375,7 @@ mod tests {
             vec![
                 Token::new(TString, "\"Hello\"", 1),
                 Token::new(TString, "\"world!\"", 1),
-                Token::new(TEof, "", 1),
+                Token::new(TEof, "Eof", 1),
             ]
         )
     }
@@ -389,7 +389,7 @@ mod tests {
             vec![
                 Token::new(TNumber, "12345", 1),
                 Token::new(TNumber, "123.45", 1),
-                Token::new(TEof, "", 1),
+                Token::new(TEof, "Eof", 1),
             ]
         )
     }
@@ -404,7 +404,7 @@ mod tests {
                 Token::new(TIdentifier, "abc", 1),
                 Token::new(TIdentifier, "abc123", 1),
                 Token::new(TIdentifier, "ab_cd", 1),
-                Token::new(TEof, "", 1),
+                Token::new(TEof, "Eof", 1),
             ]
         )
     }
@@ -434,7 +434,7 @@ mod tests {
                 Token::new(TTrue, "true", 1),
                 Token::new(TVar, "var", 1),
                 Token::new(TWhile, "while", 1),
-                Token::new(TEof, "", 1),
+                Token::new(TEof, "Eof", 1),
             ]
         )
     }
