@@ -53,7 +53,8 @@ fn run(source: reader::Source) -> Result<(), Error> {
     println!("tokens: {tokens:?}");
     let ast = parser::parse(tokens)?;
     println!("ast: {ast:?}");
-    let _out = evaluator::evaluate(ast)?;
+    let out = evaluator::evaluate(ast)?;
+    println!("out: {out:?}");
     Ok(())
 }
 
@@ -66,7 +67,7 @@ fn run_prompt() {
     // need to read from stdin
     // create a source object and pass to run
     let mut stdout = std::io::stdout();
-    let mut stdin = std::io::stdin();
+    let stdin = std::io::stdin();
     loop {
         stdout.write_all(b"> ").unwrap();
         stdout.flush().unwrap();

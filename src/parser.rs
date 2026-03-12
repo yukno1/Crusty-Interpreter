@@ -116,11 +116,17 @@ impl Parser {
 
     // parse a single value
     fn parse_primary(&mut self) -> Result<Expr, Error> {
-        Ok(if self.accept(TokenType::TNumber) {
+        Ok(if self.accept(TNumber) {
             Expr::num(self.last_lexeme())
-        } else if self.accept(TokenType::TString) {
+        } else if self.accept(TString) {
             Expr::str(self.last_lexeme())
-        } else if self.accept(TokenType::TLeftParen) {
+        } else if self.accept(TNil) {
+            Expr::nil()
+        } else if self.accept(TTrue) {
+            Expr::bool(true)
+        } else if self.accept(TFalse) {
+            Expr::bool(false)
+        } else if self.accept(TLeftParen) {
             let expr = self.parse_expression()?;
             self.expect(TRightParen, "Expected ')' after expression")?;
             Expr::grouping(expr)
