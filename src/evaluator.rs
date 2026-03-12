@@ -2,14 +2,12 @@
 //
 // Run a Lox program
 
-use std::fmt::format;
-
 use crate::ast::{AST, Expr, Operator};
 
 // when evaluating, there must be some machine-representation in lox
 // this enum provides this mapping
 // goal of evaluator is to translate the AST into a Loxvalue
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum LoxValue {
     LNil,
     LBoolean(bool),
@@ -46,9 +44,19 @@ pub fn evaluate_expression(expr: &Expr) -> Result<LoxValue, Error> {
                 // number ops
                 (LNumber(x), OAdd, LNumber(y)) => LNumber(x + y),
                 (LNumber(x), OSub, LNumber(y)) => LNumber(x - y),
+                (LNumber(x), OMul, LNumber(y)) => LNumber(x * y),
+                (LNumber(x), ODiv, LNumber(y)) => LNumber(x / y),
+                (LNumber(x), OLt, LNumber(y)) => LBoolean(x < y),
+                (LNumber(x), OLe, LNumber(y)) => LBoolean(x <= y),
+                (LNumber(x), OGt, LNumber(y)) => LBoolean(x > y),
+                (LNumber(x), OGe, LNumber(y)) => LBoolean(x >= y),
 
                 // string ops
                 (LString(x), OAdd, LString(y)) => LString(format!("{x}{y}")),
+
+                // eq works with any type
+                (x, OEq, y) => LBoolean(x == y),
+                (x, ONe, y) => LBoolean(x != y),
                 _ => panic!("Unsupported operation"),
             }
         }
