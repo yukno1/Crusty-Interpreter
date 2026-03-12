@@ -174,6 +174,19 @@ mod tests {
                 top: Expr::str("\"hello\"")
             }
         );
+        assert_eq!(parse_string("nil"), AST { top: Expr::nil() });
+        assert_eq!(
+            parse_string("true"),
+            AST {
+                top: Expr::bool(true)
+            }
+        );
+        assert_eq!(
+            parse_string("false"),
+            AST {
+                top: Expr::bool(false)
+            }
+        );
         assert_eq!(
             parse_string("(2)"),
             AST {

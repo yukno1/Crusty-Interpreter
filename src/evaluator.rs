@@ -2,7 +2,9 @@
 //
 // Run a Lox program
 
-use crate::ast::{AST, Expr};
+use std::fmt::format;
+
+use crate::ast::{AST, Expr, Operator};
 
 // when evaluating, there must be some machine-representation in lox
 // this enum provides this mapping
@@ -36,7 +38,19 @@ pub fn evaluate_expression(expr: &Expr) -> Result<LoxValue, Error> {
             operator,
             right,
         } => {
-            todo!()
+            use LoxValue::*;
+            use Operator::*;
+            let lv = evaluate_expression(left)?;
+            let rv = evaluate_expression(right)?;
+            match (lv, operator, rv) {
+                // number ops
+                (LNumber(x), OAdd, LNumber(y)) => LNumber(x + y),
+                (LNumber(x), OSub, LNumber(y)) => LNumber(x - y),
+
+                // string ops
+                (LString(x), OAdd, LString(y)) => LString(format!("{x}{y}")),
+                _ => panic!("Unsupported operation"),
+            }
         }
         Expr::EUnary { operator, right } => {
             todo!()
