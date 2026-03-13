@@ -104,7 +104,7 @@ impl Parser {
     }
 
     fn parse_expression(&mut self) -> Result<Expr, Error> {
-        let left = self.parse_primary()?;
+        let left = self.parse_unary()?;
         if self.accepts([
             TPlus,
             TMinus,
@@ -118,10 +118,19 @@ impl Parser {
             TBangEqual,
         ]) {
             let operator = Operator::from(self.last_token());
-            let right = self.parse_primary()?;
+            let right = self.parse_unary()?;
             Ok(Expr::binary(left, operator, right))
         } else {
             Ok(left)
+        }
+    }
+
+    fn parse_unary(&mut self) -> Result<Expr, Error> {
+        if self.accepts([TMinus, TBang]) {
+            let op = Operator::from(self.last_token());
+            Ok(Expr::unary(op, self.parse_unary()?))
+        } else {
+            self.parse_primary()
         }
     }
 

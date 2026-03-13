@@ -6,7 +6,7 @@ pub struct AST {
     pub top: Expr,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Operator {
     OAdd,
     OSub,
@@ -138,11 +138,11 @@ pub fn format_expr(expr: &Expr) -> String {
     }
 }
 
-pub fn main() {
-    let expression = Expr::binary(
-        Expr::unary(Operator::OSub, Expr::num("123")),
-        Operator::OMul,
-        Expr::grouping(Expr::num("45.67")),
-    );
-    println!("{}", format_expr(&expression));
-}
+// pub fn main() {
+//     let expression = Expr::binary(
+//         Expr::unary(Operator::OSub, Expr::num("123")),
+//         Operator::OMul,
+//         Expr::grouping(Expr::num("45.67")),
+//     );
+//     println!("{}", format_expr(&expression));
+// }

@@ -16,6 +16,7 @@ pub enum TokenType {
     TSemiColon,
     TSlash,
     TStar,
+
     // one or two character tokens
     TBang,
     TBangEqual,
@@ -25,10 +26,12 @@ pub enum TokenType {
     TGreaterEqual,
     TLess,
     TLessEqual,
+
     // literals
     TIdentifier,
     TString,
     TNumber,
+
     // keywords
     TAnd,
     TClass,
@@ -49,12 +52,12 @@ pub enum TokenType {
     TEof,
 }
 
-#[derive(Debug, PartialEq)]
-pub enum Literal {
-    Str(String),
-    Num(f64),
-    None,
-}
+// #[derive(Debug, PartialEq)]
+// pub enum Literal {
+//     Str(String),
+//     Num(f64),
+//     None,
+// }
 
 use TokenType::*;
 
@@ -194,7 +197,6 @@ impl Scanner {
             '-' => self.add_token(TMinus),
             '*' => self.add_token(TStar),
             ';' => self.add_token(TSemiColon),
-            '/' => self.add_token(TSlash),
             '!' => {
                 let toktype = if self.matches('=') { TBangEqual } else { TBang };
                 self.add_token(toktype);

@@ -15,10 +15,23 @@ pub enum LoxValue {
     LString(String),
 }
 
+impl LoxValue {
+    pub fn is_truthy(&self) -> bool {
+        match self {
+            LoxValue::LNil | LoxValue::LBoolean(false) => false,
+            _ => true,
+        }
+    }
+}
+
 type Output = LoxValue;
 
 #[derive(Debug)]
-pub struct Error {}
+pub enum Error {
+    ZeroDivision,
+    UnsupportedBinaryOperation(LoxValue, Operator, LoxValue),
+    UnsupportedUnaryOperation(Operator, LoxValue),
+}
 
 pub fn evaluate(ast: AST) -> Result<Output, Error> {
     println!("Evaluating");
@@ -45,7 +58,12 @@ pub fn evaluate_expression(expr: &Expr) -> Result<LoxValue, Error> {
                 (LNumber(x), OAdd, LNumber(y)) => LNumber(x + y),
                 (LNumber(x), OSub, LNumber(y)) => LNumber(x - y),
                 (LNumber(x), OMul, LNumber(y)) => LNumber(x * y),
-                (LNumber(x), ODiv, LNumber(y)) => LNumber(x / y),
+                (LNumber(x), ODiv, LNumber(y)) => {
+                    if y == 0.0 {
+                        return Err(Error::ZeroDivision);
+                    }
+                    LNumber(x / y)
+                }
                 (LNumber(x), OLt, LNumber(y)) => LBoolean(x < y),
                 (LNumber(x), OLe, LNumber(y)) => LBoolean(x <= y),
                 (LNumber(x), OGt, LNumber(y)) => LBoolean(x > y),
@@ -57,15 +75,24 @@ pub fn evaluate_expression(expr: &Expr) -> Result<LoxValue, Error> {
                 // eq works with any type
                 (x, OEq, y) => LBoolean(x == y),
                 (x, ONe, y) => LBoolean(x != y),
-                _ => panic!("Unsupported operation"),
+                (lv, operator, rv) => {
+                    return Err(Error::UnsupportedBinaryOperation(lv, *operator, rv));
+                }
             }
         }
         Expr::EUnary { operator, right } => {
-            todo!()
+            use LoxValue::*;
+            use Operator::*;
+            let rv = evaluate_expression(right)?;
+            match (operator, rv) {
+                (OSub, LNumber(x)) => LNumber(-x),
+                (ONot, x) => LBoolean(!x.is_truthy()),
+                (operator, rv) => {
+                    return Err(Error::UnsupportedUnaryOperation(*operator, rv));
+                }
+            }
         }
-        Expr::EGrouping { expression } => {
-            todo!()
-        }
+        Expr::EGrouping { expression } => evaluate_expression(expression)?,
     })
 }
 
