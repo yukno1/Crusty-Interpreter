@@ -2,7 +2,7 @@
 
 use std::usize;
 
-use crate::ast::{AST, Expr, Operator};
+use crate::ast::{AST, Expr, Operator, Stmt};
 use crate::tokenizer::{Token, TokenType, Tokens};
 use TokenType::*;
 
@@ -101,6 +101,14 @@ impl Parser {
             return Err(self.syntax_error("Unparsed input"));
         }
         Ok(AST { top })
+    }
+
+    fn parse_statements(&mut self) -> Result<Vec<Stmt>, Error> {
+        todo!()
+    }
+
+    fn parse_statement(&mut self) -> Result<Vec<Stmt>, Error> {
+        todo!()
     }
 
     fn parse_expression(&mut self) -> Result<Expr, Error> {

@@ -2,7 +2,7 @@
 //
 // Run a Lox program
 
-use crate::ast::{AST, Expr, Operator};
+use crate::ast::{AST, Expr, Operator, Stmt};
 
 // when evaluating, there must be some machine-representation in lox
 // this enum provides this mapping
@@ -31,6 +31,16 @@ pub enum Error {
     ZeroDivision,
     UnsupportedBinaryOperation(LoxValue, Operator, LoxValue),
     UnsupportedUnaryOperation(Operator, LoxValue),
+}
+
+pub fn execute(statements: &Vec<Stmt>) -> Result<(), Error> {
+    // 0 or more statements
+    todo!()
+}
+
+pub fn execute_statement(stmt: &Stmt) -> Result<(), Error> {
+    // execute a single stmt
+    todo!()
 }
 
 pub fn evaluate(ast: AST) -> Result<Output, Error> {

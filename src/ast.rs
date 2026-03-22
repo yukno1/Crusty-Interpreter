@@ -23,6 +23,27 @@ pub enum Operator {
     OOr,
 }
 
+impl std::fmt::Display for Operator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use Operator::*;
+        f.write_str(match self {
+            OAdd => "+",
+            OSub => "-",
+            OMul => "*",
+            ODiv => "/",
+            OLt => "<",
+            OLe => "<=",
+            OGt => ">",
+            OGe => ">=",
+            OEq => "==",
+            ONe => "!=",
+            OAnd => "and",
+            ONot => "!",
+            OOr => "or",
+        })
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub enum Expr {
     // store number as strings representing the way
@@ -90,6 +111,22 @@ impl Expr {
         Expr::EGrouping {
             expression: expr.into(),
         }
+    }
+}
+
+// statement
+pub enum Stmt {
+    SPrint { expr: Expr },
+    SExpression { expr: Expr },
+}
+
+impl Stmt {
+    pub fn print(e: Expr) -> Stmt {
+        Stmt::SPrint { expr: e }
+    }
+
+    pub fn exprStmt(e: Expr) -> Stmt {
+        Stmt::SExpression { expr: e }
     }
 }
 
