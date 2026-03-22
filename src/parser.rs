@@ -65,7 +65,7 @@ impl Parser {
         }
     }
 
-    fn expect(&mut self, toktype: TokenType, msg: &str) -> Result<(), Error> {
+    fn consume(&mut self, toktype: TokenType, msg: &str) -> Result<(), Error> {
         // require next token to exactly match given token or else error
         if !self.accept(toktype) {
             Err(self.syntax_error(msg))
@@ -107,7 +107,23 @@ impl Parser {
         todo!()
     }
 
-    fn parse_statement(&mut self) -> Result<Vec<Stmt>, Error> {
+    fn parse_statement(&mut self) -> Result<Stmt, Error> {
+        // parse a single statement
+        if self.accept(TPrint) {
+            self.parse_print_statement()
+        } else {
+            self.parse_expression_statement()
+        }
+    }
+
+    fn parse_print_statement(&mut self) -> Result<Stmt, Error> {
+        // print expression
+        let value = self.parse_expression()?;
+        self.consume(TSemiColon, "Expect ';' after value.")?;
+        Ok(Stmt::print(value))
+    }
+
+    fn parse_expression_statement(&mut self) -> Result<Stmt, Error> {
         todo!()
     }
 
@@ -156,7 +172,7 @@ impl Parser {
             Expr::bool(false)
         } else if self.accept(TLeftParen) {
             let expr = self.parse_expression()?;
-            self.expect(TRightParen, "Expected ')' after expression")?;
+            self.consume(TRightParen, "Expected ')' after expression")?;
             Expr::grouping(expr)
         } else {
             return Err(self.syntax_error("Expected primary"));
