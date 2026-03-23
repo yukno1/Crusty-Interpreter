@@ -37,6 +37,8 @@ impl std::fmt::Display for LoxValue {
 
 type Output = ();
 
+type Environment = crate::environ::Environment<LoxValue>;
+
 #[derive(Debug)]
 pub enum Error {
     ZeroDivision,
@@ -44,24 +46,24 @@ pub enum Error {
     UnsupportedUnaryOperation(Operator, LoxValue),
 }
 
-pub fn execute_statements(statements: &Vec<Stmt>) -> Result<(), Error> {
+pub fn execute_statements(statements: &Vec<Stmt>, environ: &Environment) -> Result<(), Error> {
     // 0 or more statements
     for stmt in statements.iter() {
-        execute_statement(stmt)?
+        execute_statement(stmt, environ)?
     }
     Ok(())
 }
 
-pub fn execute_statement(stmt: &Stmt) -> Result<(), Error> {
+pub fn execute_statement(stmt: &Stmt, environ: &Environment) -> Result<(), Error> {
     // execute a single stmt
     match stmt {
         Stmt::SPrint { expr } => {
-            let value = evaluate_expression(expr)?;
+            let value = evaluate_expression(expr, environ)?;
             println!("{value}");
         }
         Stmt::SExpression { expr } => {
             // expression evaluate, but discard result
-            evaluate_expression(expr)?;
+            evaluate_expression(expr, environ)?;
         }
         Stmt::SVar { name, initializer } => todo!(),
     }
@@ -70,11 +72,12 @@ pub fn execute_statement(stmt: &Stmt) -> Result<(), Error> {
 
 pub fn evaluate(ast: AST) -> Result<Output, Error> {
     // println!("Evaluating");
-    execute_statements(&ast.top)?;
+    let environ = Environment::new();
+    execute_statements(&ast.top, &environ)?;
     Ok(())
 }
 
-pub fn evaluate_expression(expr: &Expr) -> Result<LoxValue, Error> {
+pub fn evaluate_expression(expr: &Expr, environ: &Environment) -> Result<LoxValue, Error> {
     Ok(match expr {
         Expr::ENum { value } => LoxValue::LNumber(value.parse().unwrap()),
         Expr::EStr { value } => LoxValue::LString(value.clone()),
@@ -87,8 +90,8 @@ pub fn evaluate_expression(expr: &Expr) -> Result<LoxValue, Error> {
         } => {
             use LoxValue::*;
             use Operator::*;
-            let lv = evaluate_expression(left)?;
-            let rv = evaluate_expression(right)?;
+            let lv = evaluate_expression(left, environ)?;
+            let rv = evaluate_expression(right, environ)?;
             match (lv, operator, rv) {
                 // number ops
                 (LNumber(x), OAdd, LNumber(y)) => LNumber(x + y),
@@ -119,7 +122,7 @@ pub fn evaluate_expression(expr: &Expr) -> Result<LoxValue, Error> {
         Expr::EUnary { operator, right } => {
             use LoxValue::*;
             use Operator::*;
-            let rv = evaluate_expression(right)?;
+            let rv = evaluate_expression(right, environ)?;
             match (operator, rv) {
                 (OSub, LNumber(x)) => LNumber(-x),
                 (ONot, x) => LBoolean(!x.is_truthy()),
@@ -128,7 +131,7 @@ pub fn evaluate_expression(expr: &Expr) -> Result<LoxValue, Error> {
                 }
             }
         }
-        Expr::EGrouping { expression } => evaluate_expression(expression)?,
+        Expr::EGrouping { expression } => evaluate_expression(expression, environ)?,
     })
 }
 
