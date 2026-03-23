@@ -24,7 +24,7 @@ impl LoxValue {
     }
 }
 
-type Output = LoxValue;
+type Output = ();
 
 #[derive(Debug)]
 pub enum Error {
@@ -33,9 +33,12 @@ pub enum Error {
     UnsupportedUnaryOperation(Operator, LoxValue),
 }
 
-pub fn interpret(statements: &Vec<Stmt>) -> Result<(), Error> {
+pub fn execute_statements(statements: &Vec<Stmt>) -> Result<(), Error> {
     // 0 or more statements
-    todo!()
+    for stmt in statements.iter() {
+        execute_statement(stmt)?
+    }
+    Ok(())
 }
 
 pub fn execute_statement(stmt: &Stmt) -> Result<(), Error> {
@@ -55,8 +58,9 @@ pub fn execute_statement(stmt: &Stmt) -> Result<(), Error> {
 }
 
 pub fn evaluate(ast: AST) -> Result<Output, Error> {
-    println!("Evaluating");
-    evaluate_expression(&ast.top)
+    // println!("Evaluating");
+    execute_statements(&ast.top)?;
+    Ok(())
 }
 
 pub fn evaluate_expression(expr: &Expr) -> Result<LoxValue, Error> {

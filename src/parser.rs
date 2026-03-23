@@ -96,7 +96,7 @@ impl Parser {
     }
 
     fn parse_top(&mut self) -> Result<AST, Error> {
-        let top = self.parse_expression()?;
+        let top = self.parse_statements()?;
         if !self.at_end() {
             return Err(self.syntax_error("Unparsed input"));
         }
@@ -130,7 +130,9 @@ impl Parser {
     }
 
     fn parse_expression_statement(&mut self) -> Result<Stmt, Error> {
-        todo!()
+        let value = self.parse_expression()?;
+        self.consume(TSemiColon, "Expect ';' after value.")?;
+        Ok(Stmt::expression(value))
     }
 
     fn parse_expression(&mut self) -> Result<Expr, Error> {
@@ -187,7 +189,7 @@ impl Parser {
 }
 
 pub fn parse(tokens: Tokens) -> Result<AST, Error> {
-    println!("Parsing");
+    // println!("Parsing");
     Parser::new(tokens).parse_top()
     // Ok(AST { top: None })
 }

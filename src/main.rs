@@ -50,11 +50,11 @@ impl From<evaluator::Error> for Error {
 
 fn run(source: reader::Source) -> Result<(), Error> {
     let tokens = tokenizer::tokenize(source)?;
-    println!("tokens: {tokens:?}");
+    // println!("tokens: {tokens:?}");
     let ast = parser::parse(tokens)?;
-    println!("ast: {ast:?}");
-    let out = evaluator::evaluate(ast)?;
-    println!("out: {out:?}");
+    // println!("ast: {ast:?}");
+    evaluator::evaluate(ast)?;
+    // println!("out: {out:?}");
     Ok(())
 }
 

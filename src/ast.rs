@@ -3,7 +3,7 @@
 // top-level representation of ast for entire program
 #[derive(Debug, PartialEq)]
 pub struct AST {
-    pub top: Expr,
+    pub top: Vec<Stmt>,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -115,6 +115,7 @@ impl Expr {
 }
 
 // statement
+#[derive(Debug, PartialEq)]
 pub enum Stmt {
     SPrint { expr: Expr },
     SExpression { expr: Expr },
@@ -125,7 +126,7 @@ impl Stmt {
         Stmt::SPrint { expr: e }
     }
 
-    pub fn exprStmt(e: Expr) -> Stmt {
+    pub fn expression(e: Expr) -> Stmt {
         Stmt::SExpression { expr: e }
     }
 }

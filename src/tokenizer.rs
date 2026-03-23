@@ -313,7 +313,7 @@ impl Scanner {
 }
 
 pub fn tokenize(source: Source) -> Result<Tokens, Error> {
-    println!("Tokenizing");
+    // println!("Tokenizing");
     Scanner::new(&source.contents).scan_tokens()
 }
 
