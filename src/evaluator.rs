@@ -7,7 +7,7 @@ use crate::ast::{AST, Expr, Operator, Stmt};
 // when evaluating, there must be some machine-representation in lox
 // this enum provides this mapping
 // goal of evaluator is to translate the AST into a Loxvalue
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum LoxValue {
     LNil,
     LBoolean(bool),
@@ -46,7 +46,14 @@ pub enum Error {
     UnsupportedUnaryOperation(Operator, LoxValue),
 }
 
-pub fn execute_statements(statements: &Vec<Stmt>, environ: &Environment) -> Result<(), Error> {
+pub fn evaluate(ast: AST) -> Result<Output, Error> {
+    // println!("Evaluating");
+    let mut environ = Environment::new();
+    execute_statements(&ast.top, &mut environ)?;
+    Ok(())
+}
+
+pub fn execute_statements(statements: &Vec<Stmt>, environ: &mut Environment) -> Result<(), Error> {
     // 0 or more statements
     for stmt in statements.iter() {
         execute_statement(stmt, environ)?
@@ -54,7 +61,7 @@ pub fn execute_statements(statements: &Vec<Stmt>, environ: &Environment) -> Resu
     Ok(())
 }
 
-pub fn execute_statement(stmt: &Stmt, environ: &Environment) -> Result<(), Error> {
+pub fn execute_statement(stmt: &Stmt, environ: &mut Environment) -> Result<(), Error> {
     // execute a single stmt
     match stmt {
         Stmt::SPrint { expr } => {
@@ -65,16 +72,15 @@ pub fn execute_statement(stmt: &Stmt, environ: &Environment) -> Result<(), Error
             // expression evaluate, but discard result
             evaluate_expression(expr, environ)?;
         }
-        Stmt::SVarDecl { name, initializer } => todo!(),
+        Stmt::SVarDecl { name, initializer } => {
+            let iv = match initializer {
+                Some(v) => evaluate_expression(v, environ)?,
+                None => LoxValue::LNil,
+            };
+            environ.declare(name, iv);
+        }
     }
     Ok(()) // statement don't produce result
-}
-
-pub fn evaluate(ast: AST) -> Result<Output, Error> {
-    // println!("Evaluating");
-    let environ = Environment::new();
-    execute_statements(&ast.top, &environ)?;
-    Ok(())
 }
 
 pub fn evaluate_expression(expr: &Expr, environ: &Environment) -> Result<LoxValue, Error> {
@@ -132,7 +138,7 @@ pub fn evaluate_expression(expr: &Expr, environ: &Environment) -> Result<LoxValu
             }
         }
         Expr::EGrouping { expression } => evaluate_expression(expression, environ)?,
-        Expr::EVariable { name } => todo!(),
+        Expr::EVariable { name } => environ.lookup(name).unwrap().clone(),
     })
 }
 

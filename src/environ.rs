@@ -15,12 +15,12 @@ impl<V> Environment<V> {
 
     pub fn declare(&mut self, name: &str, value: V) {
         //declare a new var (var name = value)
-        todo!()
+        self.vars.insert(name.into(), value);
     }
 
-    pub fn lookup(&mut self, name: &str) -> V {
-        // look up value of a var
-        todo!()
+    pub fn lookup(&self, name: &str) -> Option<&V> {
+        // look up value of a var (might not exists)
+        self.vars.get(name)
     }
 
     pub fn assign(&mut self, name: &str, value: V) {
