@@ -33,14 +33,25 @@ pub enum Error {
     UnsupportedUnaryOperation(Operator, LoxValue),
 }
 
-pub fn execute(statements: &Vec<Stmt>) -> Result<(), Error> {
+pub fn interpret(statements: &Vec<Stmt>) -> Result<(), Error> {
     // 0 or more statements
     todo!()
 }
 
 pub fn execute_statement(stmt: &Stmt) -> Result<(), Error> {
     // execute a single stmt
-    todo!()
+    match stmt {
+        Stmt::SPrint { expr } => {
+            let value = evaluate_expression(expr)?;
+            // TODO: make display better
+            println!("{value:?}");
+        }
+        Stmt::SExpression { expr } => {
+            // expression evaluate, but discard result
+            evaluate_expression(expr)?;
+        }
+    }
+    Ok(()) // statement don't produce result
 }
 
 pub fn evaluate(ast: AST) -> Result<Output, Error> {

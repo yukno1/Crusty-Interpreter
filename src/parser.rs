@@ -103,8 +103,14 @@ impl Parser {
         Ok(AST { top })
     }
 
+    // for statements, need more methods
     fn parse_statements(&mut self) -> Result<Vec<Stmt>, Error> {
-        todo!()
+        // parse 0 or more statements
+        let mut statements = Vec::new();
+        while !self.at_end() {
+            statements.push(self.parse_statement()?);
+        }
+        Ok(statements)
     }
 
     fn parse_statement(&mut self) -> Result<Stmt, Error> {
