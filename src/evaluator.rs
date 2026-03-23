@@ -24,6 +24,17 @@ impl LoxValue {
     }
 }
 
+impl std::fmt::Display for LoxValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            LoxValue::LNil => f.write_str("nil"),
+            LoxValue::LBoolean(v) => f.write_str(&format!("{v}")),
+            LoxValue::LNumber(v) => f.write_str(&format!("{v}")),
+            LoxValue::LString(v) => f.write_str(&format!("{v}")),
+        }
+    }
+}
+
 type Output = ();
 
 #[derive(Debug)]
@@ -46,8 +57,7 @@ pub fn execute_statement(stmt: &Stmt) -> Result<(), Error> {
     match stmt {
         Stmt::SPrint { expr } => {
             let value = evaluate_expression(expr)?;
-            // TODO: make display better
-            println!("{value:?}");
+            println!("{value}");
         }
         Stmt::SExpression { expr } => {
             // expression evaluate, but discard result
