@@ -124,9 +124,16 @@ impl Expr {
 // statement
 #[derive(Debug, PartialEq)]
 pub enum Stmt {
-    SPrint { expr: Expr },
-    SExpression { expr: Expr },
-    SVarDecl { name: String, initializer: Expr },
+    SPrint {
+        expr: Expr,
+    },
+    SExpression {
+        expr: Expr,
+    },
+    SVarDecl {
+        name: String,
+        initializer: Option<Expr>,
+    },
 }
 
 impl Stmt {
@@ -138,7 +145,7 @@ impl Stmt {
         Stmt::SExpression { expr: e }
     }
 
-    pub fn var(name: impl Into<String>, initializer: Expr) -> Stmt {
+    pub fn var_decl(name: impl Into<String>, initializer: Option<Expr>) -> Stmt {
         Stmt::SVarDecl {
             name: name.into(),
             initializer,

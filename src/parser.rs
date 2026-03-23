@@ -108,9 +108,20 @@ impl Parser {
         // parse 0 or more statements
         let mut statements = Vec::new();
         while !self.at_end() {
-            statements.push(self.parse_statement()?);
+            statements.push(self.parse_declration()?);
         }
         Ok(statements)
+    }
+
+    fn parse_declration(&mut self) -> Result<Stmt, Error> {
+        // parse a decl or stmt
+        // there are tricky rules about where "var" can go in lox
+        // so var decl is singled out as special case
+        if self.accept(TVar) {
+            self.parse_var_declaration()
+        } else {
+            self.parse_statement()
+        }
     }
 
     fn parse_statement(&mut self) -> Result<Stmt, Error> {
@@ -133,6 +144,17 @@ impl Parser {
         let value = self.parse_expression()?;
         self.consume(TSemiColon, "Expect ';' after value.")?;
         Ok(Stmt::expression(value))
+    }
+
+    pub fn parse_var_declaration(&mut self) -> Result<Stmt, Error> {
+        self.consume(TIdentifier, "Expect variable name")?;
+        let name = self.last_lexeme().clone();
+        let mut initializer = None;
+        if self.accept(TEqual) {
+            initializer = Some(self.parse_expression()?);
+        }
+        self.consume(TSemiColon, "Expect ';' after variable declaration.")?;
+        Ok(Stmt::var_decl(name, initializer))
     }
 
     pub fn parse_expression(&mut self) -> Result<Expr, Error> {
@@ -182,6 +204,8 @@ impl Parser {
             let expr = self.parse_expression()?;
             self.consume(TRightParen, "Expected ')' after expression")?;
             Expr::grouping(expr)
+        } else if self.accept(TIdentifier) {
+            Expr::variable(self.last_lexeme())
         } else {
             return Err(self.syntax_error("Expected primary"));
         })
