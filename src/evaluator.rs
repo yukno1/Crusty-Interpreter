@@ -63,6 +63,7 @@ pub fn execute_statement(stmt: &Stmt) -> Result<(), Error> {
             // expression evaluate, but discard result
             evaluate_expression(expr)?;
         }
+        Stmt::SVar { name, initializer } => todo!(),
     }
     Ok(()) // statement don't produce result
 }

@@ -119,6 +119,7 @@ impl Expr {
 pub enum Stmt {
     SPrint { expr: Expr },
     SExpression { expr: Expr },
+    SVar { name: String, initializer: Expr },
 }
 
 impl Stmt {
@@ -128,6 +129,13 @@ impl Stmt {
 
     pub fn expression(e: Expr) -> Stmt {
         Stmt::SExpression { expr: e }
+    }
+
+    pub fn var(name: impl Into<String>, initializer: Expr) -> Stmt {
+        Stmt::SVar {
+            name: name.into(),
+            initializer,
+        }
     }
 }
 
