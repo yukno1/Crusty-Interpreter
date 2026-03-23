@@ -70,6 +70,9 @@ pub enum Expr {
     EGrouping {
         expression: Box<Expr>,
     },
+    EVariable {
+        name: String,
+    },
 }
 
 impl Expr {
@@ -112,6 +115,10 @@ impl Expr {
             expression: expr.into(),
         }
     }
+
+    pub fn variable(name: impl Into<String>) -> Expr {
+        Expr::EVariable { name: name.into() }
+    }
 }
 
 // statement
@@ -119,7 +126,7 @@ impl Expr {
 pub enum Stmt {
     SPrint { expr: Expr },
     SExpression { expr: Expr },
-    SVar { name: String, initializer: Expr },
+    SVarDecl { name: String, initializer: Expr },
 }
 
 impl Stmt {
@@ -132,7 +139,7 @@ impl Stmt {
     }
 
     pub fn var(name: impl Into<String>, initializer: Expr) -> Stmt {
-        Stmt::SVar {
+        Stmt::SVarDecl {
             name: name.into(),
             initializer,
         }
@@ -181,6 +188,7 @@ pub fn format_expr(expr: &Expr) -> String {
         Expr::EGrouping { expression } => {
             format!("group {}", format_expr(expression))
         }
+        Expr::EVariable { name } => format!("{name}"),
     }
 }
 

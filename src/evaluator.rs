@@ -65,7 +65,7 @@ pub fn execute_statement(stmt: &Stmt, environ: &Environment) -> Result<(), Error
             // expression evaluate, but discard result
             evaluate_expression(expr, environ)?;
         }
-        Stmt::SVar { name, initializer } => todo!(),
+        Stmt::SVarDecl { name, initializer } => todo!(),
     }
     Ok(()) // statement don't produce result
 }
@@ -132,6 +132,7 @@ pub fn evaluate_expression(expr: &Expr, environ: &Environment) -> Result<LoxValu
             }
         }
         Expr::EGrouping { expression } => evaluate_expression(expression, environ)?,
+        Expr::EVariable { name } => todo!(),
     })
 }
 
