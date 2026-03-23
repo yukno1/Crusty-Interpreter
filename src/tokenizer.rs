@@ -65,21 +65,14 @@ use TokenType::*;
 pub struct Token {
     pub toktype: TokenType,
     pub lexeme: String,
-    // pub literal: Literal,
     pub line: usize,
 }
 
 impl Token {
-    pub fn new(
-        toktype: TokenType,
-        lexeme: impl Into<String>,
-        // literal: Literal,
-        line: usize,
-    ) -> Token {
+    pub fn new(toktype: TokenType, lexeme: impl Into<String>, line: usize) -> Token {
         Token {
             toktype,
             lexeme: lexeme.into(),
-            // literal,
             line,
         }
     }

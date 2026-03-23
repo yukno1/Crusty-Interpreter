@@ -3,6 +3,7 @@ use std::io::Write;
 // initially break the project into 4 parts
 // Each in own file
 mod ast;
+mod environ;
 mod evaluator;
 mod parser;
 mod reader;
