@@ -59,6 +59,19 @@ fn run(source: reader::Source) -> Result<(), Error> {
     Ok(())
 }
 
+fn run_interp(
+    interpreter: &mut evaluator::Interpreter,
+    source: reader::Source,
+) -> Result<(), Error> {
+    let tokens = tokenizer::tokenize(source)?;
+    // println!("tokens: {tokens:?}");
+    let ast = parser::parse(tokens)?;
+    // println!("ast: {ast:?}");
+    interpreter.evaluate(ast)?;
+    // println!("out: {out:?}");
+    Ok(())
+}
+
 fn run_file(filename: &str) -> Result<(), Error> {
     let source = reader::read_source(filename)?;
     run(source)
@@ -69,13 +82,14 @@ fn run_prompt() {
     // create a source object and pass to run
     let mut stdout = std::io::stdout();
     let stdin = std::io::stdin();
+    let mut interpreter = evaluator::Interpreter::new();
     loop {
         stdout.write_all(b"> ").unwrap();
         stdout.flush().unwrap();
         let mut buffer: String = String::new();
         stdin.read_line(&mut buffer).unwrap();
         let source = reader::Source { contents: buffer };
-        match run(source) {
+        match run_interp(&mut interpreter, source) {
             Ok(_) => {}
             Err(e) => {
                 println!("{e:?}");

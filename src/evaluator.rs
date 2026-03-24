@@ -46,6 +46,24 @@ pub enum Error {
     UnsupportedUnaryOperation(Operator, LoxValue),
 }
 
+// for interactive REPL, need some way to kkeeo environment around
+pub struct Interpreter {
+    top_level: Environment,
+}
+
+impl Interpreter {
+    pub fn new() -> Interpreter {
+        Interpreter {
+            top_level: Environment::new(),
+        }
+    }
+
+    pub fn evaluate(&mut self, ast: AST) -> Result<Output, Error> {
+        execute_statements(&ast.top, &mut self.top_level)?;
+        Ok(())
+    }
+}
+
 pub fn evaluate(ast: AST) -> Result<Output, Error> {
     // println!("Evaluating");
     let mut environ = Environment::new();
