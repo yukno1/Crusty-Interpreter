@@ -157,6 +157,7 @@ impl Parser {
         Ok(Stmt::var_decl(name, initializer))
     }
 
+    // 表达式
     pub fn parse_expression(&mut self) -> Result<Expr, Error> {
         let left = self.parse_unary()?;
         if self.accepts([
@@ -179,6 +180,7 @@ impl Parser {
         }
     }
 
+    // 1元项
     fn parse_unary(&mut self) -> Result<Expr, Error> {
         if self.accepts([TMinus, TBang]) {
             let op = Operator::from(self.last_token());

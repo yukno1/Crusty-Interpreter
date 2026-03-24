@@ -50,12 +50,8 @@ impl From<evaluator::Error> for Error {
 }
 
 fn run(source: reader::Source) -> Result<(), Error> {
-    let tokens = tokenizer::tokenize(source)?;
-    // println!("tokens: {tokens:?}");
-    let ast = parser::parse(tokens)?;
-    // println!("ast: {ast:?}");
-    evaluator::evaluate(ast)?;
-    // println!("out: {out:?}");
+    let mut interpreter = evaluator::Interpreter::new();
+    run_interp(&mut interpreter, source)?;
     Ok(())
 }
 
